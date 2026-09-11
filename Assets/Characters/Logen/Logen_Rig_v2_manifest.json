@@ -1,0 +1,296 @@
+{
+  "character": "Logen",
+  "rig_version": "v2_clean",
+  "source": "arkusz_sprite_\u00f3w_skrytob\u00f3jcy_w_kapturze.png",
+  "extraction": "connected_alpha_component",
+  "parts": [
+    {
+      "file": "Logen_rig_head_mask_hood.png",
+      "source_bbox_px": [
+        53,
+        32,
+        296,
+        354
+      ],
+      "content_size_px": [
+        243,
+        322
+      ],
+      "canvas_size_px": [
+        259,
+        338
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_right_empty_sleeve.png",
+      "source_bbox_px": [
+        838,
+        46,
+        989,
+        424
+      ],
+      "content_size_px": [
+        151,
+        378
+      ],
+      "canvas_size_px": [
+        167,
+        394
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_torso_upper.png",
+      "source_bbox_px": [
+        320,
+        58,
+        565,
+        413
+      ],
+      "content_size_px": [
+        245,
+        355
+      ],
+      "canvas_size_px": [
+        261,
+        371
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_waist_belt_front.png",
+      "source_bbox_px": [
+        583,
+        85,
+        806,
+        468
+      ],
+      "content_size_px": [
+        223,
+        383
+      ],
+      "canvas_size_px": [
+        239,
+        399
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_left_upper_arm.png",
+      "source_bbox_px": [
+        1019,
+        85,
+        1142,
+        339
+      ],
+      "content_size_px": [
+        123,
+        254
+      ],
+      "canvas_size_px": [
+        139,
+        270
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_left_forearm_hand.png",
+      "source_bbox_px": [
+        1154,
+        87,
+        1229,
+        407
+      ],
+      "content_size_px": [
+        75,
+        320
+      ],
+      "canvas_size_px": [
+        91,
+        336
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_cloak_back_full.png",
+      "source_bbox_px": [
+        22,
+        402,
+        401,
+        1201
+      ],
+      "content_size_px": [
+        379,
+        799
+      ],
+      "canvas_size_px": [
+        395,
+        815
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_right_thigh.png",
+      "source_bbox_px": [
+        1100,
+        452,
+        1222,
+        676
+      ],
+      "content_size_px": [
+        122,
+        224
+      ],
+      "canvas_size_px": [
+        138,
+        240
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_left_thigh.png",
+      "source_bbox_px": [
+        918,
+        453,
+        1042,
+        682
+      ],
+      "content_size_px": [
+        124,
+        229
+      ],
+      "canvas_size_px": [
+        140,
+        245
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_cloak_front_left.png",
+      "source_bbox_px": [
+        408,
+        458,
+        584,
+        1181
+      ],
+      "content_size_px": [
+        176,
+        723
+      ],
+      "canvas_size_px": [
+        192,
+        739
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_cloak_front_right.png",
+      "source_bbox_px": [
+        637,
+        474,
+        844,
+        1188
+      ],
+      "content_size_px": [
+        207,
+        714
+      ],
+      "canvas_size_px": [
+        223,
+        730
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_red_cloth_front.png",
+      "source_bbox_px": [
+        793,
+        535,
+        890,
+        930
+      ],
+      "content_size_px": [
+        97,
+        395
+      ],
+      "canvas_size_px": [
+        113,
+        411
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_left_shin.png",
+      "source_bbox_px": [
+        946,
+        706,
+        1051,
+        980
+      ],
+      "content_size_px": [
+        105,
+        274
+      ],
+      "canvas_size_px": [
+        121,
+        290
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_right_shin.png",
+      "source_bbox_px": [
+        1115,
+        709,
+        1210,
+        979
+      ],
+      "content_size_px": [
+        95,
+        270
+      ],
+      "canvas_size_px": [
+        111,
+        286
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_left_boot.png",
+      "source_bbox_px": [
+        862,
+        1005,
+        1036,
+        1209
+      ],
+      "content_size_px": [
+        174,
+        204
+      ],
+      "canvas_size_px": [
+        190,
+        220
+      ],
+      "padding_px": 8
+    },
+    {
+      "file": "Logen_rig_right_boot.png",
+      "source_bbox_px": [
+        1086,
+        1005,
+        1239,
+        1209
+      ],
+      "content_size_px": [
+        153,
+        204
+      ],
+      "canvas_size_px": [
+        169,
+        220
+      ],
+      "padding_px": 8
+    }
+  ]
+}

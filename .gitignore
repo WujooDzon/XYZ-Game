@@ -1,0 +1,5 @@
+.DS_Store
+
+Launcher/.build/
+Build/*
+!Build/.gitkeep

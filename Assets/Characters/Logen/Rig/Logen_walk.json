@@ -1,0 +1,1544 @@
+{
+  "name": "walk",
+  "loop": true,
+  "stride_distance": 64,
+  "duration_seconds": 1,
+  "keyframes": [
+    {
+      "phase": 0,
+      "nodes": {
+        "pelvis": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_back": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 18,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -24,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 7,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -18,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 28,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_left": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 1.2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_right": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "torso": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "waist_belt": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0.5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "red_cloth": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 3,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_empty_sleeve": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_upper_arm": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_forearm_hand": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "head_mask_hood": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -1,
+          "scale": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "phase": 0.125,
+      "nodes": {
+        "pelvis": {
+          "position": [
+            0,
+            7
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_back": {
+          "position": [
+            0,
+            5
+          ],
+          "rotation": 0.5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 10,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -35,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -10,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 20,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -3,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_left": {
+          "position": [
+            0,
+            4
+          ],
+          "rotation": 0.8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_right": {
+          "position": [
+            0,
+            4
+          ],
+          "rotation": -0.7,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "torso": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "waist_belt": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0.4,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "red_cloth": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_empty_sleeve": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_upper_arm": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 4,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_forearm_hand": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "head_mask_hood": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -1,
+          "scale": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "phase": 0.25,
+      "nodes": {
+        "pelvis": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_back": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_thigh": {
+          "position": [
+            0,
+            -20
+          ],
+          "rotation": -12,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_shin": {
+          "position": [
+            0,
+            -15
+          ],
+          "rotation": 30,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_boot": {
+          "position": [
+            0,
+            -45
+          ],
+          "rotation": 5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 10,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_left": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -0.8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_right": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0.7,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "torso": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "waist_belt": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -0.2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "red_cloth": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_empty_sleeve": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_upper_arm": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_forearm_hand": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "head_mask_hood": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -1,
+          "scale": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "phase": 0.375,
+      "nodes": {
+        "pelvis": {
+          "position": [
+            0,
+            -7
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_back": {
+          "position": [
+            0,
+            -4
+          ],
+          "rotation": -0.5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -18,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 18,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_boot": {
+          "position": [
+            0,
+            -18
+          ],
+          "rotation": 5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 12,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -15,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_left": {
+          "position": [
+            0,
+            -4
+          ],
+          "rotation": -0.7,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_right": {
+          "position": [
+            0,
+            -4
+          ],
+          "rotation": 0.6,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "torso": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "waist_belt": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -0.4,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "red_cloth": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -3,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_empty_sleeve": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_upper_arm": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_forearm_hand": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "head_mask_hood": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -1,
+          "scale": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "phase": 0.5,
+      "nodes": {
+        "pelvis": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_back": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -18,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 28,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 18,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -24,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 7,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_left": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -1.2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_right": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "torso": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "waist_belt": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -0.5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "red_cloth": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -3,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_empty_sleeve": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_upper_arm": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_forearm_hand": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "head_mask_hood": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 1,
+          "scale": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "phase": 0.625,
+      "nodes": {
+        "pelvis": {
+          "position": [
+            0,
+            7
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_back": {
+          "position": [
+            0,
+            5
+          ],
+          "rotation": -0.5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -10,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 20,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -3,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 10,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -35,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_left": {
+          "position": [
+            0,
+            4
+          ],
+          "rotation": -0.8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_right": {
+          "position": [
+            0,
+            4
+          ],
+          "rotation": 0.7,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "torso": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "waist_belt": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -0.4,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "red_cloth": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_empty_sleeve": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_upper_arm": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -4,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_forearm_hand": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "head_mask_hood": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 1,
+          "scale": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "phase": 0.75,
+      "nodes": {
+        "pelvis": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_back": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 10,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_thigh": {
+          "position": [
+            0,
+            -20
+          ],
+          "rotation": -12,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_shin": {
+          "position": [
+            0,
+            -15
+          ],
+          "rotation": 30,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_boot": {
+          "position": [
+            0,
+            -45
+          ],
+          "rotation": 5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_left": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0.8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_right": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -0.7,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "torso": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "waist_belt": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0.2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "red_cloth": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_empty_sleeve": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_upper_arm": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_forearm_hand": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "head_mask_hood": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 1,
+          "scale": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "phase": 0.875,
+      "nodes": {
+        "pelvis": {
+          "position": [
+            0,
+            -7
+          ],
+          "rotation": 0,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_back": {
+          "position": [
+            0,
+            -4
+          ],
+          "rotation": 0.5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 12,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -15,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_boot": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_thigh": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -18,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_shin": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 18,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_boot": {
+          "position": [
+            0,
+            -18
+          ],
+          "rotation": 5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_left": {
+          "position": [
+            0,
+            -4
+          ],
+          "rotation": 0.7,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "cloak_front_right": {
+          "position": [
+            0,
+            -4
+          ],
+          "rotation": -0.6,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "torso": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": -2,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "waist_belt": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 0.4,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "red_cloth": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 3,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "right_empty_sleeve": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 1,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_upper_arm": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 8,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "left_forearm_hand": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 5,
+          "scale": [
+            1,
+            1
+          ]
+        },
+        "head_mask_hood": {
+          "position": [
+            0,
+            0
+          ],
+          "rotation": 1,
+          "scale": [
+            1,
+            1
+          ]
+        }
+      }
+    }
+  ]
+}

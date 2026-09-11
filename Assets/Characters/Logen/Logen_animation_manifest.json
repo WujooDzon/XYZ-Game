@@ -1,0 +1,27 @@
+{
+  "character": "Logen",
+  "canonicalFacing": "right",
+  "visibleHeight": 160,
+  "idle": {
+    "fps": 6,
+    "frames": [
+      "Logen_idle_right_01.png",
+      "Logen_idle_right_02.png",
+      "Logen_idle_right_03.png",
+      "Logen_idle_right_04.png"
+    ]
+  },
+  "walk": {
+    "fps": 10,
+    "frames": [
+      "Logen_walk_right_01.png",
+      "Logen_walk_right_02.png",
+      "Logen_walk_right_03.png",
+      "Logen_walk_right_04.png",
+      "Logen_walk_right_05.png",
+      "Logen_walk_right_06.png",
+      "Logen_walk_right_07.png",
+      "Logen_walk_right_08.png"
+    ]
+  }
+}

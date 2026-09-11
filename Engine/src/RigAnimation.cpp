@@ -94,6 +94,29 @@ RigPoseTransform interpolate(
                 + (end.scaleMultiplier.y - start.scaleMultiplier.y) * amount}};
 }
 
+RigPose blendPoses(const RigPose& start, const RigPose& end, float amount) {
+    RigPose result;
+    std::set<std::string> nodeIds;
+    for (const auto& [nodeId, ignored] : start.nodes) {
+        static_cast<void>(ignored);
+        nodeIds.insert(nodeId);
+    }
+    for (const auto& [nodeId, ignored] : end.nodes) {
+        static_cast<void>(ignored);
+        nodeIds.insert(nodeId);
+    }
+    for (const std::string& nodeId : nodeIds) {
+        const auto startIterator = start.nodes.find(nodeId);
+        const auto endIterator = end.nodes.find(nodeId);
+        const RigPoseTransform startTransform =
+            startIterator == start.nodes.end() ? identityTransform() : startIterator->second;
+        const RigPoseTransform endTransform =
+            endIterator == end.nodes.end() ? identityTransform() : endIterator->second;
+        result.nodes.emplace(nodeId, interpolate(startTransform, endTransform, amount));
+    }
+    return result;
+}
+
 } // namespace
 
 bool RigAnimation::load(const std::filesystem::path& path, std::string& error) {
@@ -149,6 +172,14 @@ bool RigAnimation::load(const std::filesystem::path& path, std::string& error) {
         }
 
         RigAnimationKeyframe keyframe;
+        keyframe.label = "pose_" + std::to_string(index + 1U);
+        if (const JsonValue* labelValue = keyframeValue.find("label"); labelValue != nullptr) {
+            if (!labelValue->isString() || labelValue->string().empty()) {
+                error = keyframeContext + " field 'label' must be a non-empty string";
+                return false;
+            }
+            keyframe.label = labelValue->string();
+        }
         if (!readNumber(keyframeValue, "phase", keyframeContext, keyframe.phase, error)) {
             return false;
         }
@@ -303,30 +334,165 @@ bool RigAnimation::loop() const noexcept {
     return loop_;
 }
 
-void RigAnimator::setAnimation(const RigAnimation* animation) noexcept {
+std::string_view RigAnimation::keyframeLabel(std::size_t index) const noexcept {
+    if (index >= keyframes_.size()) {
+        return {};
+    }
+    return keyframes_[index].label;
+}
+
+float RigAnimation::keyframePhase(std::size_t index) const noexcept {
+    if (index >= keyframes_.size()) {
+        return 0.0F;
+    }
+    return keyframes_[index].phase;
+}
+
+std::size_t RigAnimation::keyframeIndexForPhase(float normalizedPhase) const noexcept {
+    if (keyframes_.empty()) {
+        return 0;
+    }
+    float phase = std::fmod(normalizedPhase, 1.0F);
+    if (phase < 0.0F) {
+        phase += 1.0F;
+    }
+    const auto next = std::upper_bound(
+        keyframes_.begin(),
+        keyframes_.end(),
+        phase,
+        [](float value, const RigAnimationKeyframe& keyframe) {
+            return value < keyframe.phase;
+        });
+    if (next == keyframes_.begin()) {
+        return 0;
+    }
+    if (next == keyframes_.end()) {
+        return keyframes_.size() - 1U;
+    }
+    return static_cast<std::size_t>(std::distance(keyframes_.begin(), next - 1));
+}
+
+void RigAnimator::setAnimation(
+    const RigAnimation* animation,
+    float transitionSeconds,
+    bool preservePhase) noexcept {
+    if (animation_ == animation) {
+        return;
+    }
+
+    if (animation_ != nullptr) {
+        if (animation_->name() == "walk") {
+            walkPhase_ = phase_;
+        } else if (animation_->name() == "idle") {
+            idlePhase_ = phase_;
+        }
+    }
+
+    previousPose_ = pose_;
+    hasPreviousPose_ = animation_ != nullptr && transitionSeconds > 0.0F;
+    transitionDuration_ = hasPreviousPose_ ? transitionSeconds : 0.0F;
+    transitionElapsed_ = 0.0F;
     animation_ = animation;
-    reset();
+    if (animation_ == nullptr) {
+        phase_ = 0.0F;
+        pose_ = {};
+        keyframeIndex_ = 0;
+        hasPreviousPose_ = false;
+        return;
+    }
+
+    if (preservePhase) {
+        phase_ = animation_->name() == "walk" ? walkPhase_ : idlePhase_;
+    } else {
+        phase_ = 0.0F;
+        if (animation_->name() == "walk") {
+            walkPhase_ = 0.0F;
+        } else if (animation_->name() == "idle") {
+            idlePhase_ = 0.0F;
+        }
+    }
+    updatePose();
 }
 
 void RigAnimator::reset() noexcept {
     phase_ = 0.0F;
+    if (animation_ != nullptr) {
+        if (animation_->name() == "walk") {
+            walkPhase_ = 0.0F;
+        } else if (animation_->name() == "idle") {
+            idlePhase_ = 0.0F;
+        }
+    }
+    transitionDuration_ = 0.0F;
+    transitionElapsed_ = 0.0F;
+    hasPreviousPose_ = false;
     updatePose();
 }
 
 void RigAnimator::advanceByDistance(float distance) noexcept {
-    if (animation_ == nullptr || distance <= 0.0F || animation_->strideDistance() <= 0.0F) {
+    if (paused_ || animation_ == nullptr || distance <= 0.0F
+        || animation_->strideDistance() <= 0.0F) {
         return;
     }
-    phase_ += std::fabs(distance) / animation_->strideDistance();
+    const float delta = std::fabs(distance) / animation_->strideDistance();
+    phase_ += delta;
+    if (animation_->name() == "walk") {
+        walkPhase_ = phase_;
+    } else {
+        idlePhase_ = phase_;
+    }
     updatePose();
 }
 
 void RigAnimator::advanceByTime(float deltaSeconds) noexcept {
-    if (animation_ == nullptr || deltaSeconds <= 0.0F || animation_->durationSeconds() <= 0.0F) {
+    if (paused_ || animation_ == nullptr || deltaSeconds <= 0.0F
+        || animation_->durationSeconds() <= 0.0F) {
         return;
     }
     phase_ += deltaSeconds / animation_->durationSeconds();
+    if (animation_->name() == "walk") {
+        walkPhase_ = phase_;
+    } else {
+        idlePhase_ = phase_;
+    }
     updatePose();
+}
+
+void RigAnimator::updateTransition(float deltaSeconds) noexcept {
+    if (!hasPreviousPose_ || transitionDuration_ <= 0.0F) {
+        return;
+    }
+    transitionElapsed_ = std::min(
+        transitionElapsed_ + std::max(0.0F, deltaSeconds),
+        transitionDuration_);
+    updatePose();
+}
+
+void RigAnimator::advanceKeyframe(int direction) noexcept {
+    if (!paused_ || animation_ == nullptr || animation_->keyframeCount() == 0U
+        || direction == 0) {
+        return;
+    }
+    const std::size_t count = animation_->keyframeCount();
+    std::size_t index = animation_->keyframeIndexForPhase(phase_);
+    if (direction > 0) {
+        index = (index + 1U) % count;
+    } else {
+        index = index == 0U ? count - 1U : index - 1U;
+    }
+    phase_ = animation_->keyframePhase(index);
+    if (animation_->name() == "walk") {
+        walkPhase_ = phase_;
+    } else {
+        idlePhase_ = phase_;
+    }
+    hasPreviousPose_ = false;
+    transitionDuration_ = 0.0F;
+    updatePose();
+}
+
+void RigAnimator::setPaused(bool paused) noexcept {
+    paused_ = paused;
 }
 
 const RigPose& RigAnimator::pose() const {
@@ -341,10 +507,27 @@ std::string_view RigAnimator::animationName() const noexcept {
     return animation_ == nullptr ? std::string_view{} : animation_->name();
 }
 
+std::string_view RigAnimator::keyframeLabel() const noexcept {
+    return animation_ == nullptr ? std::string_view{} : animation_->keyframeLabel(keyframeIndex_);
+}
+
+std::size_t RigAnimator::keyframeIndex() const noexcept {
+    return keyframeIndex_;
+}
+
+bool RigAnimator::paused() const noexcept {
+    return paused_;
+}
+
+bool RigAnimator::isBlending() const noexcept {
+    return hasPreviousPose_ && transitionElapsed_ < transitionDuration_;
+}
+
 void RigAnimator::updatePose() noexcept {
     if (animation_ == nullptr) {
         pose_ = {};
         phase_ = 0.0F;
+        keyframeIndex_ = 0;
         return;
     }
     if (animation_->loop()) {
@@ -355,7 +538,20 @@ void RigAnimator::updatePose() noexcept {
     } else {
         phase_ = std::clamp(phase_, 0.0F, 1.0F);
     }
-    pose_ = animation_->sample(phase_);
+    keyframeIndex_ = animation_->keyframeIndexForPhase(phase_);
+    const RigPose sampledPose = animation_->sample(phase_);
+    if (hasPreviousPose_ && transitionDuration_ > 0.0F) {
+        const float amount = std::clamp(
+            transitionElapsed_ / transitionDuration_,
+            0.0F,
+            1.0F);
+        pose_ = blendPoses(previousPose_, sampledPose, amount);
+        if (amount >= 1.0F) {
+            hasPreviousPose_ = false;
+        }
+    } else {
+        pose_ = sampledPose;
+    }
 }
 
 }

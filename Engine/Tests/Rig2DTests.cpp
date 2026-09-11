@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -19,8 +20,8 @@ std::filesystem::path writeDefinition(
     std::ofstream file(path);
     file << R"({
   "global_scale": 1.0,
-  "target_height": 10.0,
-  "root_offset": [0.0, 0.0],
+  "target_height": 941.0,
+  "root_to_ground": [0.0, 0.0],
   "nodes": )" << nodes << "\n}\n";
     return path;
 }
@@ -77,6 +78,10 @@ int main() {
         check(rig.loadDefinition(renderer, validPath, error), error.c_str());
         check(rig.nodes().size() == 3, "all nodes load");
         check(rig.nodes()[1].children.size() == 1, "children are linked");
+        check(std::fabs(rig.neutralHeight() - 941.0F) < 0.1F,
+              "neutral rig height is normalized to target height");
+        check(rig.rootToGround().x == 0.0F && rig.rootToGround().y == 0.0F,
+              "ground anchor is explicit and fixed");
 
         rig.setRootPosition({100.0F, 200.0F});
         const auto neutralWorld = rig.worldNodes({});
@@ -99,6 +104,18 @@ int main() {
         check(child != nullptr, "mirrored child world node exists");
         check(child->position.x == 85.0F, "child position mirrors around root");
         rig.setMirrored(false);
+
+        const auto childIndex = rig.nodeIndex("child");
+        check(childIndex.has_value(), "calibration can select a node");
+        check(rig.adjustNodePosition(*childIndex, {2.0F, -1.0F}),
+              "calibration moves a node");
+        check(rig.adjustNodeRotation(*childIndex, 3.0F),
+              "calibration rotates a node");
+        check(rig.adjustNodePivot(*childIndex, {0.01F, -0.01F}),
+              "calibration adjusts a pivot");
+        check(rig.saveCalibration(error), "calibration saves with a backup");
+        check(std::filesystem::exists(validPath.parent_path() / "valid.backup.json"),
+              "calibration backup is created before overwrite");
 
         const std::size_t validNodeCount = rig.nodes().size();
         const auto duplicatePath = writeDefinition(

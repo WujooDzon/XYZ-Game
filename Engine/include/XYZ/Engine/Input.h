@@ -6,6 +6,25 @@
 
 namespace xyz::engine {
 
+struct RigCalibrationInput {
+    bool nextNode = false;
+    bool previousNode = false;
+    bool stepPrevious = false;
+    bool stepNext = false;
+    bool save = false;
+    bool moveLeft = false;
+    bool moveRight = false;
+    bool moveUp = false;
+    bool moveDown = false;
+    bool rotateLeft = false;
+    bool rotateRight = false;
+    bool pivotLeft = false;
+    bool pivotRight = false;
+    bool pivotUp = false;
+    bool pivotDown = false;
+    bool largeStep = false;
+};
+
 class Input {
 public:
     void beginFrame() noexcept;
@@ -17,6 +36,9 @@ public:
     [[nodiscard]] bool leftMousePressed() const noexcept;
     [[nodiscard]] bool rigDebugTogglePressed() const noexcept;
     [[nodiscard]] bool rigReloadPressed() const noexcept;
+    [[nodiscard]] bool masterReferenceTogglePressed() const noexcept;
+    [[nodiscard]] bool rigPauseTogglePressed() const noexcept;
+    [[nodiscard]] const RigCalibrationInput& rigCalibration() const noexcept;
     [[nodiscard]] bool quitRequested() const noexcept;
 
 private:
@@ -26,6 +48,9 @@ private:
     bool leftMousePressed_ = false;
     bool rigDebugTogglePressed_ = false;
     bool rigReloadPressed_ = false;
+    bool masterReferenceTogglePressed_ = false;
+    bool rigPauseTogglePressed_ = false;
+    RigCalibrationInput rigCalibration_{};
     bool quitRequested_ = false;
 };
 

@@ -2,6 +2,7 @@ add_executable(XYZGame
     src/main.cpp
     src/GameApp.cpp
     src/GuffmanBasementScene.cpp
+    src/FootPlantController.cpp
     src/PlayerController.cpp
 )
 
@@ -19,6 +20,7 @@ add_test(NAME XYZPlayerControllerTests COMMAND XYZPlayerControllerTests)
 
 add_executable(XYZGuffmanBasementSceneTests
     Tests/GuffmanBasementSceneTests.cpp
+    src/FootPlantController.cpp
     src/GuffmanBasementScene.cpp
     src/PlayerController.cpp
 )
@@ -27,3 +29,12 @@ target_include_directories(XYZGuffmanBasementSceneTests PRIVATE include)
 target_link_libraries(XYZGuffmanBasementSceneTests PRIVATE XYZEngine)
 add_test(NAME XYZGuffmanBasementSceneTests COMMAND XYZGuffmanBasementSceneTests)
 set_tests_properties(XYZGuffmanBasementSceneTests PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
+add_executable(XYZFootPlantControllerTests
+    Tests/FootPlantControllerTests.cpp
+    src/FootPlantController.cpp
+)
+
+target_include_directories(XYZFootPlantControllerTests PRIVATE include)
+target_link_libraries(XYZFootPlantControllerTests PRIVATE XYZEngine)
+add_test(NAME XYZFootPlantControllerTests COMMAND XYZFootPlantControllerTests)

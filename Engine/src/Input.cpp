@@ -6,6 +6,9 @@ void Input::beginFrame() noexcept {
     leftMousePressed_ = false;
     rigDebugTogglePressed_ = false;
     rigReloadPressed_ = false;
+    masterReferenceTogglePressed_ = false;
+    rigPauseTogglePressed_ = false;
+    rigCalibration_ = {};
 }
 
 void Input::handleEvent(const SDL_Event& event) noexcept {
@@ -20,11 +23,9 @@ void Input::handleEvent(const SDL_Event& event) noexcept {
             const bool pressed = event.key.down;
             switch (event.key.scancode) {
                 case SDL_SCANCODE_A:
-                case SDL_SCANCODE_LEFT:
                     state_.moveLeft = pressed;
                     break;
                 case SDL_SCANCODE_D:
-                case SDL_SCANCODE_RIGHT:
                     state_.moveRight = pressed;
                     break;
                 case SDL_SCANCODE_ESCAPE:
@@ -40,6 +41,98 @@ void Input::handleEvent(const SDL_Event& event) noexcept {
                 case SDL_SCANCODE_R:
                     if (pressed && !event.key.repeat) {
                         rigReloadPressed_ = true;
+                    }
+                    break;
+                case SDL_SCANCODE_F4:
+                    if (pressed && !event.key.repeat) {
+                        masterReferenceTogglePressed_ = true;
+                    }
+                    break;
+                case SDL_SCANCODE_F5:
+                    if (pressed && !event.key.repeat) {
+                        rigPauseTogglePressed_ = true;
+                    }
+                    break;
+                case SDL_SCANCODE_TAB:
+                    if (pressed && !event.key.repeat) {
+                        if ((event.key.mod & SDL_KMOD_SHIFT) != 0) {
+                            rigCalibration_.previousNode = true;
+                        } else {
+                            rigCalibration_.nextNode = true;
+                        }
+                    }
+                    break;
+                case SDL_SCANCODE_COMMA:
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.stepPrevious = true;
+                    }
+                    break;
+                case SDL_SCANCODE_PERIOD:
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.stepNext = true;
+                    }
+                    break;
+                case SDL_SCANCODE_S:
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.save = true;
+                    }
+                    break;
+                case SDL_SCANCODE_Q:
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.rotateLeft = true;
+                        rigCalibration_.largeStep = (event.key.mod & SDL_KMOD_SHIFT) != 0;
+                    }
+                    break;
+                case SDL_SCANCODE_E:
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.rotateRight = true;
+                        rigCalibration_.largeStep = (event.key.mod & SDL_KMOD_SHIFT) != 0;
+                    }
+                    break;
+                case SDL_SCANCODE_J:
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.pivotLeft = true;
+                    }
+                    break;
+                case SDL_SCANCODE_L:
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.pivotRight = true;
+                    }
+                    break;
+                case SDL_SCANCODE_I:
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.pivotUp = true;
+                    }
+                    break;
+                case SDL_SCANCODE_K:
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.pivotDown = true;
+                    }
+                    break;
+                case SDL_SCANCODE_UP:
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.moveUp = true;
+                        rigCalibration_.largeStep = (event.key.mod & SDL_KMOD_SHIFT) != 0;
+                    }
+                    break;
+                case SDL_SCANCODE_DOWN:
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.moveDown = true;
+                        rigCalibration_.largeStep = (event.key.mod & SDL_KMOD_SHIFT) != 0;
+                    }
+                    break;
+                case SDL_SCANCODE_LEFT:
+                    state_.moveLeft = pressed;
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.moveLeft = true;
+                        rigCalibration_.largeStep = (event.key.mod & SDL_KMOD_SHIFT) != 0;
+                    }
+                    break;
+                case SDL_SCANCODE_RIGHT:
+                    state_.moveRight = pressed;
+                    if (pressed && !event.key.repeat) {
+                        rigCalibration_.moveRight = true;
+                        rigCalibration_.largeStep = (event.key.mod & SDL_KMOD_SHIFT) != 0;
                     }
                     break;
                 default:
@@ -87,6 +180,18 @@ bool Input::rigDebugTogglePressed() const noexcept {
 
 bool Input::rigReloadPressed() const noexcept {
     return rigReloadPressed_;
+}
+
+bool Input::masterReferenceTogglePressed() const noexcept {
+    return masterReferenceTogglePressed_;
+}
+
+bool Input::rigPauseTogglePressed() const noexcept {
+    return rigPauseTogglePressed_;
+}
+
+const RigCalibrationInput& Input::rigCalibration() const noexcept {
+    return rigCalibration_;
 }
 
 bool Input::quitRequested() const noexcept {

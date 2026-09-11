@@ -1,5 +1,6 @@
 #include "XYZ/Game/GameApp.h"
 
+#include <cmath>
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
@@ -118,7 +119,7 @@ int GameApp::run(int argc, char** argv) const {
 int GameApp::runSelfTest() const {
     for (const auto& path : stage01BAssetPaths(projectRoot_)) {
         if (!std::filesystem::is_regular_file(path)) {
-            std::cerr << "Stage 01B self-test missing asset: " << path.string() << "\n";
+            std::cerr << "Stage 01C self-test missing asset: " << path.string() << "\n";
             return 1;
         }
     }
@@ -130,7 +131,7 @@ int GameApp::runSelfTest() const {
                                  const char* label) -> std::optional<engine::JsonValue> {
         auto document = engine::JsonValue::parseFile(path, error);
         if (!document.has_value() || !document->isObject()) {
-            std::cerr << "Stage 01B self-test invalid " << label << ": "
+        std::cerr << "Stage 01C self-test invalid " << label << ": "
                       << (error.empty() ? path.string() : error) << "\n";
             return std::nullopt;
         }
@@ -144,6 +145,15 @@ int GameApp::runSelfTest() const {
     }
 
     const auto* nodeValues = definition->find("nodes");
+    const auto* targetHeight = definition->find("target_height");
+    const auto* rootToGround = definition->find("root_to_ground");
+    if (targetHeight == nullptr || !targetHeight->isNumber()
+        || std::fabs(targetHeight->number() - 188.0) > 0.001
+        || rootToGround == nullptr || !rootToGround->isArray()
+        || rootToGround->array().size() != 2U) {
+        std::cerr << "Stage 01C self-test requires target_height 188 and root_to_ground\n";
+        return 1;
+    }
     const std::set<std::string> expectedParts{
         "Logen_rig_cloak_back_full.png",
         "Logen_rig_cloak_front_left.png",
@@ -154,7 +164,6 @@ int GameApp::runSelfTest() const {
         "Logen_rig_left_shin.png",
         "Logen_rig_left_thigh.png",
         "Logen_rig_left_upper_arm.png",
-        "Logen_rig_red_cloth_front.png",
         "Logen_rig_right_boot.png",
         "Logen_rig_right_empty_sleeve.png",
         "Logen_rig_right_shin.png",
@@ -166,7 +175,7 @@ int GameApp::runSelfTest() const {
     bool hasEmptyRightSleeve = false;
     if (nodeValues == nullptr || !nodeValues->isArray()
         || nodeValues->array().size() != expectedParts.size() + 1U) {
-        std::cerr << "Stage 01B self-test expected pelvis plus 16 rig parts\n";
+        std::cerr << "Stage 01C self-test expected pelvis plus 15 active rig parts\n";
         return 1;
     }
     for (const auto& node : nodeValues->array()) {
@@ -174,7 +183,7 @@ int GameApp::runSelfTest() const {
         const auto* image = node.find("image");
         if (!node.isObject() || id == nullptr || image == nullptr
             || !id->isString() || !image->isString()) {
-            std::cerr << "Stage 01B self-test found malformed rig node\n";
+            std::cerr << "Stage 01C self-test found malformed rig node\n";
             return 1;
         }
         if (id->string() == "pelvis") {
@@ -190,12 +199,12 @@ int GameApp::runSelfTest() const {
         if (id->string().find("right_hand") != std::string::npos
             || imageName.find("right_hand") != std::string::npos
             || imageName.find("right_forearm") != std::string::npos) {
-            std::cerr << "Stage 01B self-test found forbidden right hand art\n";
+            std::cerr << "Stage 01C self-test found forbidden right hand art\n";
             return 1;
         }
     }
     if (!hasPelvisRoot || !hasEmptyRightSleeve || actualParts != expectedParts) {
-        std::cerr << "Stage 01B self-test rig nodes do not match supplied parts\n";
+        std::cerr << "Stage 01C self-test rig nodes do not match calibrated active parts\n";
         return 1;
     }
 
@@ -209,14 +218,14 @@ int GameApp::runSelfTest() const {
     if (walkName == nullptr || !walkName->isString() || walkName->string() != "walk"
         || walkKeyframes == nullptr || !walkKeyframes->isArray()
         || walkKeyframes->array().size() != 8U) {
-        std::cerr << "Stage 01B self-test walk animation must contain eight poses\n";
+        std::cerr << "Stage 01C self-test walk animation must contain eight labeled poses\n";
         return 1;
     }
     for (std::size_t index = 0; index < walkKeyframes->array().size(); ++index) {
         const auto* phase = walkKeyframes->array()[index].find("phase");
         if (phase == nullptr || !phase->isNumber()
             || phase->number() != static_cast<double>(index) / 8.0) {
-            std::cerr << "Stage 01B self-test walk phases are not 0..0.875\n";
+            std::cerr << "Stage 01C self-test walk phases are not 0..0.875\n";
             return 1;
         }
     }
@@ -227,7 +236,7 @@ int GameApp::runSelfTest() const {
         || idleDuration == nullptr || !idleDuration->isNumber() || idleDuration->number() <= 0.0
         || idleKeyframes == nullptr || !idleKeyframes->isArray()
         || idleKeyframes->array().size() < 2U) {
-        std::cerr << "Stage 01B self-test idle animation is incomplete\n";
+        std::cerr << "Stage 01C self-test idle animation is incomplete\n";
         return 1;
     }
 
@@ -235,11 +244,11 @@ int GameApp::runSelfTest() const {
     engine::RigAnimation idleAnimation;
     if (!walkAnimation.load(rigDirectory / "Logen_walk.json", error)
         || !idleAnimation.load(rigDirectory / "Logen_idle.json", error)) {
-        std::cerr << "Stage 01B self-test animation load failed: " << error << "\n";
+        std::cerr << "Stage 01C self-test animation load failed: " << error << "\n";
         return 1;
     }
 
-    std::cout << "XYZ Game Stage 01B self-test passed.\n";
+    std::cout << "XYZ Game Stage 01C self-test passed.\n";
     return 0;
 }
 

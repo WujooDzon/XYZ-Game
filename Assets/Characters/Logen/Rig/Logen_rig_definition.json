@@ -1,7 +1,7 @@
 {
-  "global_scale": 0.15,
+  "global_scale": 1.0,
   "target_height": 188.0,
-  "root_offset": [0.0, -102.0],
+  "root_to_ground": [0.0, 679.4],
   "nodes": [
     {
       "id": "pelvis",
@@ -22,6 +22,26 @@
       "rotation": 0.0,
       "scale": [1.0, 1.0],
       "z": -10
+    },
+    {
+      "id": "cloak_front_left",
+      "parent": "pelvis",
+      "image": "../Logen_rig_cloak_front_left.png",
+      "position": [-50.0, -320.0],
+      "pivot": [0.85, 0.03],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 5
+    },
+    {
+      "id": "cloak_front_right",
+      "parent": "pelvis",
+      "image": "../Logen_rig_cloak_front_right.png",
+      "position": [50.0, -320.0],
+      "pivot": [0.15, 0.03],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 6
     },
     {
       "id": "right_thigh",
@@ -49,6 +69,7 @@
       "image": "../Logen_rig_right_boot.png",
       "position": [0.0, 267.0],
       "pivot": [0.30, 0.08],
+      "ground_contact": [0.90, 1.0],
       "rotation": 0.0,
       "scale": [1.0, 1.0],
       "z": 12
@@ -79,29 +100,10 @@
       "image": "../Logen_rig_left_boot.png",
       "position": [0.0, 267.0],
       "pivot": [0.30, 0.08],
+      "ground_contact": [0.90, 1.0],
       "rotation": 0.0,
       "scale": [1.0, 1.0],
       "z": 22
-    },
-    {
-      "id": "cloak_front_left",
-      "parent": "pelvis",
-      "image": "../Logen_rig_cloak_front_left.png",
-      "position": [-50.0, -320.0],
-      "pivot": [0.85, 0.03],
-      "rotation": 0.0,
-      "scale": [1.0, 1.0],
-      "z": 28
-    },
-    {
-      "id": "cloak_front_right",
-      "parent": "pelvis",
-      "image": "../Logen_rig_cloak_front_right.png",
-      "position": [50.0, -320.0],
-      "pivot": [0.15, 0.03],
-      "rotation": 0.0,
-      "scale": [1.0, 1.0],
-      "z": 29
     },
     {
       "id": "torso",
@@ -122,16 +124,6 @@
       "rotation": 0.0,
       "scale": [1.0, 1.0],
       "z": 35
-    },
-    {
-      "id": "red_cloth",
-      "parent": "torso",
-      "image": "../Logen_rig_red_cloth_front.png",
-      "position": [30.0, 55.0],
-      "pivot": [0.5, 0.04],
-      "rotation": 0.0,
-      "scale": [1.0, 1.0],
-      "z": 38
     },
     {
       "id": "right_empty_sleeve",

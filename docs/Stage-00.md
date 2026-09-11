@@ -1,6 +1,6 @@
 # XYZ — Stage 00 Developer Launcher
 
-Stage 00 establishes the macOS developer workflow. The launcher remains the central build/configure/run tool; the current C++ target is documented in [Stage 01B](Stage-01B.md).
+Stage 00 establishes the macOS developer workflow. The launcher remains the central build/configure/run tool; the current C++ target is documented in [Stage 01C](Stage-01C.md).
 
 ## Prerequisites
 
@@ -46,4 +46,4 @@ Run the complete acceptance check:
 ./Tools/verify-stage00.sh
 ```
 
-It runs all Swift tests, builds the launcher in Debug and Release, configures/builds the current game target in both configurations, runs the Stage 01B asset self-test, verifies a non-zero build exit, and cleans generated Release output in a temporary build tree.
+It runs all Swift tests, builds the launcher in Debug and Release, configures/builds the current game target in both configurations, runs the Stage 01C asset self-test, verifies a non-zero build exit, and cleans generated Release output in a temporary build tree.

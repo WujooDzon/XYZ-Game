@@ -5,10 +5,12 @@
 #include <string>
 #include <string_view>
 
+#include "XYZ/Engine/Input.h"
 #include "XYZ/Engine/Rig2D.h"
 #include "XYZ/Engine/RigAnimation.h"
 #include "XYZ/Engine/Scene.h"
 #include "XYZ/Engine/Texture.h"
+#include "XYZ/Game/FootPlantController.h"
 #include "XYZ/Game/PlayerController.h"
 
 namespace xyz::game {
@@ -41,12 +43,22 @@ public:
     [[nodiscard]] float rigHeight() const noexcept;
     [[nodiscard]] float characterHeight() const noexcept;
     [[nodiscard]] bool usesLegacyWalkFrames() const noexcept;
+    [[nodiscard]] bool masterReferenceEnabled() const noexcept;
+    [[nodiscard]] bool rigPaused() const noexcept;
+    [[nodiscard]] std::size_t selectedRigNodeIndex() const noexcept;
+    [[nodiscard]] std::string_view selectedRigNodeId() const noexcept;
+    [[nodiscard]] std::string_view rigKeyframeLabel() const noexcept;
+    [[nodiscard]] std::size_t rigKeyframeIndex() const noexcept;
+    [[nodiscard]] FootPlantController::SupportFoot plantedFoot() const noexcept;
+    [[nodiscard]] float visualRootCorrectionX() const noexcept;
 
 private:
     bool reloadRig(engine::Renderer2D& renderer, std::string& error);
+    void applyCalibrationInput(const engine::RigCalibrationInput& calibration);
 
     std::filesystem::path projectRoot_;
     engine::Texture background_;
+    engine::Texture masterReference_;
     engine::Rig2D playerRig_;
     engine::RigAnimation idleRigAnimation_;
     engine::RigAnimation walkRigAnimation_;
@@ -54,7 +66,11 @@ private:
     PlayerController player_;
     bool walking_ = false;
     bool rigDebugEnabled_ = false;
+    bool masterReferenceEnabled_ = false;
     std::string rigReloadError_;
+    std::size_t selectedRigNodeIndex_ = 0;
+    FootPlantController footPlant_;
+    float lastWalkPhase_ = 0.0F;
     float fps_ = 0.0F;
     bool initialized_ = false;
 };

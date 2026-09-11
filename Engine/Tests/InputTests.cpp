@@ -66,5 +66,36 @@ int main() {
     input.handleEvent(reload);
     check(input.rigReloadPressed(), "R reports rig reload");
 
+    input.beginFrame();
+    SDL_Event masterToggle = debugToggle;
+    masterToggle.key.scancode = SDL_SCANCODE_F4;
+    masterToggle.key.repeat = false;
+    input.handleEvent(masterToggle);
+    check(input.masterReferenceTogglePressed(), "F4 reports master overlay toggle");
+
+    input.beginFrame();
+    SDL_Event pauseToggle = debugToggle;
+    pauseToggle.key.scancode = SDL_SCANCODE_F5;
+    pauseToggle.key.repeat = false;
+    input.handleEvent(pauseToggle);
+    check(input.rigPauseTogglePressed(), "F5 reports rig pause toggle");
+
+    input.beginFrame();
+    SDL_Event tab = debugToggle;
+    tab.key.scancode = SDL_SCANCODE_TAB;
+    tab.key.mod = SDL_KMOD_SHIFT;
+    tab.key.repeat = false;
+    input.handleEvent(tab);
+    check(input.rigCalibration().previousNode, "shift-tab selects previous rig node");
+
+    input.beginFrame();
+    SDL_Event calibrationArrow = debugToggle;
+    calibrationArrow.key.scancode = SDL_SCANCODE_RIGHT;
+    calibrationArrow.key.mod = SDL_KMOD_SHIFT;
+    calibrationArrow.key.repeat = false;
+    input.handleEvent(calibrationArrow);
+    check(input.rigCalibration().moveRight && input.rigCalibration().largeStep,
+          "shift-arrow reports a large calibration move");
+
     std::cout << "Input tests passed.\n";
 }

@@ -17,14 +17,14 @@ cmake -S "$ROOT_DIR" -B "$ACCEPTANCE_DIR/debug" -G Ninja -DCMAKE_BUILD_TYPE=Debu
 cmake --build "$ACCEPTANCE_DIR/debug" --parallel
 
 DEBUG_OUTPUT="$(XYZ_PROJECT_ROOT="$ROOT_DIR" "$ACCEPTANCE_DIR/debug/Game/XYZGame" --self-test)"
-grep -Fq "XYZ Game Stage 01B self-test passed." <<<"$DEBUG_OUTPUT"
+grep -Fq "XYZ Game Stage 01C self-test passed." <<<"$DEBUG_OUTPUT"
 
 printf '%s\n' "== Release configure/build/run =="
 cmake -S "$ROOT_DIR" -B "$ACCEPTANCE_DIR/release" -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build "$ACCEPTANCE_DIR/release" --parallel
 
 RELEASE_OUTPUT="$(XYZ_PROJECT_ROOT="$ROOT_DIR" "$ACCEPTANCE_DIR/release/Game/XYZGame" --self-test)"
-grep -Fq "XYZ Game Stage 01B self-test passed." <<<"$RELEASE_OUTPUT"
+grep -Fq "XYZ Game Stage 01C self-test passed." <<<"$RELEASE_OUTPUT"
 
 printf '%s\n' "== Non-zero build exit is observable =="
 set +e

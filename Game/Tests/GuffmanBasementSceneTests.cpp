@@ -32,7 +32,7 @@ int main() {
         std::string error;
         check(scene.initialize(renderer, error), error.c_str());
         check(!scene.usesLegacyWalkFrames(), "scene uses hierarchical rig instead of legacy frames");
-        check(scene.rigNodeCount() == 17, "rig definition contains pelvis and all 16 art parts");
+        check(scene.rigNodeCount() == 16, "rig definition contains pelvis and all 15 active art parts");
         check(scene.walkKeyframeCount() == 8, "walk animation contains eight poses");
         check(scene.idleKeyframeCount() >= 2, "idle animation contains looping poses");
         check(scene.rigHeight() >= 182.0F && scene.rigHeight() <= 194.0F,
@@ -121,6 +121,40 @@ int main() {
         input.handleEvent(debugToggle);
         scene.update(0.0F, input, renderer);
         check(scene.rigDebugEnabled(), "F3 enables rig debug overlay");
+
+        input.beginFrame();
+        SDL_Event masterToggle = debugToggle;
+        masterToggle.key.scancode = SDL_SCANCODE_F4;
+        masterToggle.key.repeat = false;
+        input.handleEvent(masterToggle);
+        scene.update(0.0F, input, renderer);
+        check(scene.masterReferenceEnabled(), "F4 enables the master reference overlay");
+
+        input.beginFrame();
+        SDL_Event pauseToggle = debugToggle;
+        pauseToggle.key.scancode = SDL_SCANCODE_F5;
+        pauseToggle.key.repeat = false;
+        input.handleEvent(pauseToggle);
+        scene.update(0.0F, input, renderer);
+        check(scene.rigPaused(), "F5 pauses rig animation");
+
+        input.beginFrame();
+        SDL_Event stepPose = debugToggle;
+        stepPose.key.scancode = SDL_SCANCODE_PERIOD;
+        stepPose.key.repeat = false;
+        input.handleEvent(stepPose);
+        scene.update(0.0F, input, renderer);
+        check(scene.rigKeyframeLabel() == "down_a", "period steps to the next walk pose");
+
+        input.beginFrame();
+        SDL_Event selectNext = debugToggle;
+        selectNext.key.scancode = SDL_SCANCODE_TAB;
+        selectNext.key.repeat = false;
+        selectNext.key.mod = SDL_KMOD_NONE;
+        input.handleEvent(selectNext);
+        scene.update(0.0F, input, renderer);
+        check(scene.selectedRigNodeIndex() == 1U, "TAB selects the next rig node");
+
         renderer.clear();
         scene.render(renderer);
         renderer.present();

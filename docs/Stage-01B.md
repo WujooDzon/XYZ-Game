@@ -1,6 +1,6 @@
 # XYZ — Stage 01B Logen Cutout Rig
 
-Stage 01B replaces the active frame-based Logen renderer with a small data-driven hierarchical 2D cutout rig. The game remains the same fixed-camera Guffman basement prototype; no new gameplay systems are included.
+Stage 01B replaces the active frame-based Logen renderer with a small data-driven hierarchical 2D cutout rig. The game remains the same fixed-camera Guffman basement prototype; no new gameplay systems are included. The follow-up calibration and walk-quality pass is documented in [Stage 01C — Logen Rig Calibration](Stage-01C.md).
 
 ## Rig data
 
@@ -20,7 +20,7 @@ The definition references the supplied PNG parts in the parent `Logen` directory
 - `R`: while F3 is active, reload the rig definition and both animation JSON files.
 - `Escape` or the window close button exits.
 
-Movement uses approximately 125 ms acceleration and 150 ms deceleration. Walk phase advances from absolute displacement using a nominal `64 px` stride; idle phase advances from elapsed time. The assembled character target is `188` logical pixels high on the `960×540` virtual canvas. Left-facing motion mirrors the canonical right-facing rig for this prototype.
+Movement uses approximately 125 ms acceleration and 150 ms deceleration. Walk phase advances from absolute displacement using the Stage 01B nominal `64 px` stride; Stage 01C calibrates the active data to a restrained `72 px` stride and adds planted-foot correction. Idle phase advances from elapsed time. The assembled character target is `188` logical pixels high on the `960×540` virtual canvas. Left-facing motion mirrors the canonical right-facing rig for this prototype.
 
 ## Build and test
 

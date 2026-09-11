@@ -2,7 +2,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 #include <functional>
+#include <iomanip>
 #include <limits>
 #include <sstream>
 #include <unordered_map>
@@ -15,6 +17,7 @@ namespace xyz::engine {
 namespace {
 
 constexpr float kPi = 3.14159265358979323846F;
+constexpr float kTranslationQuantum = 1.0F / 16.0F;
 
 SDL_FPoint add(SDL_FPoint left, SDL_FPoint right) {
     return {left.x + right.x, left.y + right.y};
@@ -31,6 +34,10 @@ SDL_FPoint rotate(SDL_FPoint point, float degrees) {
     return {
         cosine * point.x - sine * point.y,
         sine * point.x + cosine * point.y};
+}
+
+float quantize(float value) {
+    return std::round(value / kTranslationQuantum) * kTranslationQuantum;
 }
 
 const JsonValue* requiredValue(
@@ -114,12 +121,17 @@ bool readInteger(
     return true;
 }
 
+void writePoint(std::ostream& output, SDL_FPoint point) {
+    output << "[" << point.x << ", " << point.y << "]";
+}
+
 } // namespace
 
 bool Rig2D::loadDefinition(
     Renderer2D& renderer,
     const std::filesystem::path& definitionPath,
     std::string& error) {
+    error.clear();
     const auto document = JsonValue::parseFile(definitionPath, error);
     if (!document.has_value() || !document->isObject()) {
         if (error.empty()) {
@@ -129,13 +141,32 @@ bool Rig2D::loadDefinition(
     }
 
     DefinitionSettings loadedSettings;
-    if (!readNumber(*document, "global_scale", definitionPath.string(), loadedSettings.globalScale, error)
-        || !readNumber(*document, "target_height", definitionPath.string(), loadedSettings.targetHeight, error)
-        || !readPoint(*document, "root_offset", definitionPath.string(), loadedSettings.rootOffset, error)) {
+    if (!readNumber(
+            *document,
+            "global_scale",
+            definitionPath.string(),
+            loadedSettings.globalScaleMultiplier,
+            error)
+        || !readNumber(
+            *document,
+            "target_height",
+            definitionPath.string(),
+            loadedSettings.targetHeight,
+            error)
+        || !readPoint(
+            *document,
+            "root_to_ground",
+            definitionPath.string(),
+            loadedSettings.rootToGround,
+            error)) {
         return false;
     }
-    if (loadedSettings.globalScale <= 0.0F || loadedSettings.targetHeight <= 0.0F) {
-        error = definitionPath.string() + " requires positive global_scale and target_height";
+    if (loadedSettings.globalScaleMultiplier <= 0.0F
+        || loadedSettings.targetHeight <= 0.0F
+        || !std::isfinite(loadedSettings.globalScaleMultiplier)
+        || !std::isfinite(loadedSettings.targetHeight)) {
+        error = definitionPath.string()
+            + " requires positive global_scale and target_height";
         return false;
     }
 
@@ -191,6 +222,7 @@ bool Rig2D::loadDefinition(
 
         RigNode node;
         node.id = idValue->string();
+        node.imagePath = imageValue->string();
         if (!readPoint(value, "position", context, node.localPosition, error)
             || !readPoint(value, "pivot", context, node.pivot, error)
             || !readNumber(value, "rotation", context, node.baseRotationDegrees, error)
@@ -198,10 +230,16 @@ bool Rig2D::loadDefinition(
             || !readInteger(value, "z", context, node.zOrder, error)) {
             return false;
         }
+        if (value.find("ground_contact") != nullptr
+            && !readPoint(value, "ground_contact", context, node.groundContact, error)) {
+            return false;
+        }
         if (node.pivot.x < 0.0F || node.pivot.x > 1.0F
             || node.pivot.y < 0.0F || node.pivot.y > 1.0F
+            || node.groundContact.x < 0.0F || node.groundContact.x > 1.0F
+            || node.groundContact.y < 0.0F || node.groundContact.y > 1.0F
             || node.localScale.x <= 0.0F || node.localScale.y <= 0.0F) {
-            error = context + " has an invalid pivot or non-positive scale";
+            error = context + " has an invalid pivot, contact anchor, or non-positive scale";
             return false;
         }
 
@@ -216,10 +254,9 @@ bool Rig2D::loadDefinition(
             parentIds.push_back(parentValue->string());
         }
 
-        const std::string imagePath = imageValue->string();
-        if (!imagePath.empty()) {
+        if (!node.imagePath.empty()) {
             const std::filesystem::path resolvedPath =
-                definitionPath.parent_path() / std::filesystem::path(imagePath);
+                definitionPath.parent_path() / std::filesystem::path(node.imagePath);
             if (!node.texture.load(renderer.native(), resolvedPath, node.id.c_str())) {
                 error = context + " could not load image '" + resolvedPath.string() + "'";
                 return false;
@@ -274,15 +311,51 @@ bool Rig2D::loadDefinition(
         }
     }
 
+    std::vector<RigNode> previousNodes = std::move(nodes_);
+    const int previousRootIndex = rootIndex_;
+    const DefinitionSettings previousSettings = settings_;
+    const std::filesystem::path previousDefinitionPath = definitionPath_;
+    const float previousNeutralHeight = neutralHeight_;
+    const float previousEffectiveScale = effectiveScale_;
+
     nodes_ = std::move(loadedNodes);
     rootIndex_ = loadedRootIndex;
     settings_ = loadedSettings;
     definitionPath_ = definitionPath;
+    effectiveScale_ = 1.0F;
+    neutralHeight_ = bounds({}).h;
+    if (!std::isfinite(neutralHeight_) || neutralHeight_ <= 0.0F) {
+        nodes_ = std::move(previousNodes);
+        rootIndex_ = previousRootIndex;
+        settings_ = previousSettings;
+        definitionPath_ = previousDefinitionPath;
+        neutralHeight_ = previousNeutralHeight;
+        effectiveScale_ = previousEffectiveScale;
+        error = definitionPath.string() + " neutral rig has no textured height";
+        return false;
+    }
+
+    effectiveScale_ = settings_.targetHeight / neutralHeight_
+        * settings_.globalScaleMultiplier;
+    if (!std::isfinite(effectiveScale_) || effectiveScale_ <= 0.0F) {
+        nodes_ = std::move(previousNodes);
+        rootIndex_ = previousRootIndex;
+        settings_ = previousSettings;
+        definitionPath_ = previousDefinitionPath;
+        neutralHeight_ = previousNeutralHeight;
+        effectiveScale_ = previousEffectiveScale;
+        error = definitionPath.string() + " produced an invalid normalized scale";
+        return false;
+    }
     return true;
 }
 
 void Rig2D::setRootPosition(SDL_FPoint baselineAnchor) noexcept {
-    baselineAnchor_ = baselineAnchor;
+    gameplayRoot_ = baselineAnchor;
+}
+
+void Rig2D::setVisualRootCorrectionX(float correction) noexcept {
+    visualRootCorrectionX_ = std::isfinite(correction) ? correction : 0.0F;
 }
 
 void Rig2D::setMirrored(bool mirrored) noexcept {
@@ -300,20 +373,22 @@ std::vector<RigWorldNode> Rig2D::evaluateWorldNodes(const RigPose& pose) const {
     }
     output.reserve(nodes_.size());
     const SDL_FPoint rootPosition{
-        std::round(baselineAnchor_.x) + settings_.rootOffset.x,
-        std::round(baselineAnchor_.y) + settings_.rootOffset.y};
+        std::round(gameplayRoot_.x) + quantize(visualRootCorrectionX_)
+            - settings_.rootToGround.x * effectiveScale_,
+        std::round(gameplayRoot_.y) - settings_.rootToGround.y * effectiveScale_};
     evaluateNode(
         rootIndex_,
         pose,
         rootPosition,
         0.0F,
-        {settings_.globalScale, settings_.globalScale},
+        {effectiveScale_, effectiveScale_},
         false,
         output);
 
     if (mirrored_) {
+        const float mirrorRootX = rootPosition.x;
         for (RigWorldNode& world : output) {
-            world.position.x = rootPosition.x - (world.position.x - rootPosition.x);
+            world.position.x = quantize(mirrorRootX - (world.position.x - mirrorRootX));
             world.rotationDegrees = -world.rotationDegrees;
             world.pivot.x = 1.0F - world.pivot.x;
         }
@@ -322,14 +397,14 @@ std::vector<RigWorldNode> Rig2D::evaluateWorldNodes(const RigPose& pose) const {
 }
 
 void Rig2D::evaluateNode(
-    int nodeIndex,
+    int nodeIndexValue,
     const RigPose& pose,
     const SDL_FPoint& parentPosition,
     float parentRotationDegrees,
     SDL_FPoint parentScale,
     bool hasParent,
     std::vector<RigWorldNode>& output) const {
-    const RigNode& node = nodes_[nodeIndex];
+    const RigNode& node = nodes_[nodeIndexValue];
     RigPoseTransform poseTransform;
     const auto poseIterator = pose.nodes.find(node.id);
     if (poseIterator != pose.nodes.end()) {
@@ -339,7 +414,7 @@ void Rig2D::evaluateNode(
     const SDL_FPoint localPosition = add(node.localPosition, poseTransform.positionOffset);
     const SDL_FPoint localScale = multiply(node.localScale, poseTransform.scaleMultiplier);
     RigWorldNode world;
-    world.nodeIndex = nodeIndex;
+    world.nodeIndex = nodeIndexValue;
     world.parentIndex = node.parentIndex;
     world.id = node.id;
     world.pivot = node.pivot;
@@ -355,6 +430,8 @@ void Rig2D::evaluateNode(
         world.scale = multiply(parentScale, localScale);
         world.rotationDegrees = localRotation;
     }
+    world.position.x = quantize(world.position.x);
+    world.position.y = quantize(world.position.y);
 
     if (node.texture.loaded()) {
         const float width = node.texture.width() * world.scale.x;
@@ -438,16 +515,15 @@ bool Rig2D::debugRender(Renderer2D& renderer, const RigPose& pose) const {
     bool success = true;
     for (const RigWorldNode& world : worlds) {
         const SDL_FPoint pivot = world.position;
-        const SDL_Color pivotColor{255, 220, 70, SDL_ALPHA_OPAQUE};
         success = renderer.drawDebugLine(
                       {pivot.x - 3.0F, pivot.y},
                       {pivot.x + 3.0F, pivot.y},
-                      pivotColor)
+                      {255, 220, 70, SDL_ALPHA_OPAQUE})
             && success;
         success = renderer.drawDebugLine(
                       {pivot.x, pivot.y - 3.0F},
                       {pivot.x, pivot.y + 3.0F},
-                      pivotColor)
+                      {255, 220, 70, SDL_ALPHA_OPAQUE})
             && success;
         if (world.bounds.w > 0.0F && world.bounds.h > 0.0F) {
             success = renderer.drawDebugRect(
@@ -497,8 +573,9 @@ SDL_FRect Rig2D::bounds(const RigPose& pose) const {
     }
     if (!hasTexture) {
         const SDL_FPoint root{
-            std::round(baselineAnchor_.x) + settings_.rootOffset.x,
-            std::round(baselineAnchor_.y) + settings_.rootOffset.y};
+            std::round(gameplayRoot_.x) + quantize(visualRootCorrectionX_)
+                - settings_.rootToGround.x * effectiveScale_,
+            std::round(gameplayRoot_.y) - settings_.rootToGround.y * effectiveScale_};
         return {root.x, root.y, 0.0F, 0.0F};
     }
     result.w = maximumX - result.x;
@@ -506,16 +583,151 @@ SDL_FRect Rig2D::bounds(const RigPose& pose) const {
     return result;
 }
 
+SDL_FPoint Rig2D::footContactPosition(
+    std::string_view nodeId,
+    const RigPose& pose) const {
+    const auto selected = nodeIndex(nodeId);
+    if (!selected.has_value()) {
+        return {};
+    }
+    const std::vector<RigWorldNode> worlds = evaluateWorldNodes(pose);
+    const auto worldIterator = std::find_if(
+        worlds.begin(),
+        worlds.end(),
+        [&](const RigWorldNode& world) {
+            return world.nodeIndex == static_cast<int>(*selected);
+        });
+    if (worldIterator == worlds.end()) {
+        return {};
+    }
+    const RigNode& node = nodes_[*selected];
+    if (!node.texture.loaded()) {
+        return worldIterator->position;
+    }
+    const float width = node.texture.width() * worldIterator->scale.x;
+    const float height = node.texture.height() * worldIterator->scale.y;
+    SDL_FPoint localOffset{
+        (node.groundContact.x - worldIterator->pivot.x) * width,
+        (node.groundContact.y - worldIterator->pivot.y) * height};
+    if (mirrored_) {
+        localOffset.x = -localOffset.x;
+    }
+    return add(worldIterator->position, rotate(localOffset, worldIterator->rotationDegrees));
+}
+
 const std::vector<RigNode>& Rig2D::nodes() const noexcept {
     return nodes_;
 }
 
+std::optional<std::size_t> Rig2D::nodeIndex(std::string_view id) const noexcept {
+    for (std::size_t index = 0; index < nodes_.size(); ++index) {
+        if (nodes_[index].id == id) {
+            return index;
+        }
+    }
+    return std::nullopt;
+}
+
+bool Rig2D::adjustNodePosition(std::size_t index, SDL_FPoint delta) noexcept {
+    if (index >= nodes_.size() || !std::isfinite(delta.x) || !std::isfinite(delta.y)) {
+        return false;
+    }
+    nodes_[index].localPosition.x += delta.x;
+    nodes_[index].localPosition.y += delta.y;
+    return std::isfinite(nodes_[index].localPosition.x)
+        && std::isfinite(nodes_[index].localPosition.y);
+}
+
+bool Rig2D::adjustNodeRotation(std::size_t index, float deltaDegrees) noexcept {
+    if (index >= nodes_.size() || !std::isfinite(deltaDegrees)) {
+        return false;
+    }
+    nodes_[index].baseRotationDegrees += deltaDegrees;
+    return std::isfinite(nodes_[index].baseRotationDegrees);
+}
+
+bool Rig2D::adjustNodePivot(std::size_t index, SDL_FPoint delta) noexcept {
+    if (index >= nodes_.size() || !std::isfinite(delta.x) || !std::isfinite(delta.y)) {
+        return false;
+    }
+    nodes_[index].pivot.x = std::clamp(nodes_[index].pivot.x + delta.x, 0.0F, 1.0F);
+    nodes_[index].pivot.y = std::clamp(nodes_[index].pivot.y + delta.y, 0.0F, 1.0F);
+    return true;
+}
+
+bool Rig2D::saveCalibration(std::string& error) const {
+    error.clear();
+    if (definitionPath_.empty() || nodes_.empty()) {
+        error = "cannot save an empty rig calibration";
+        return false;
+    }
+
+    const std::filesystem::path backupPath = definitionPath_.parent_path()
+        / (definitionPath_.stem().string() + ".backup" + definitionPath_.extension().string());
+    std::error_code filesystemError;
+    std::filesystem::copy_file(
+        definitionPath_,
+        backupPath,
+        std::filesystem::copy_options::overwrite_existing,
+        filesystemError);
+    if (filesystemError) {
+        error = "could not create calibration backup: " + filesystemError.message();
+        return false;
+    }
+
+    std::ofstream output(definitionPath_, std::ios::trunc);
+    if (!output) {
+        error = "could not open calibration file for writing: " + definitionPath_.string();
+        return false;
+    }
+    output << std::setprecision(9);
+    output << "{\n  \"global_scale\": " << settings_.globalScaleMultiplier
+           << ",\n  \"target_height\": " << settings_.targetHeight
+           << ",\n  \"root_to_ground\": ";
+    writePoint(output, settings_.rootToGround);
+    output << ",\n  \"nodes\": [\n";
+    for (std::size_t index = 0; index < nodes_.size(); ++index) {
+        const RigNode& node = nodes_[index];
+        output << "    {\n      \"id\": \"" << node.id << "\",\n      \"parent\": ";
+        if (node.parentIndex < 0) {
+            output << "null";
+        } else {
+            output << "\"" << nodes_[node.parentIndex].id << "\"";
+        }
+        output << ",\n      \"image\": \"" << node.imagePath << "\",\n      \"position\": ";
+        writePoint(output, node.localPosition);
+        output << ",\n      \"pivot\": ";
+        writePoint(output, node.pivot);
+        output << ",\n      \"rotation\": " << node.baseRotationDegrees
+               << ",\n      \"scale\": ";
+        writePoint(output, node.localScale);
+        output << ",\n      \"ground_contact\": ";
+        writePoint(output, node.groundContact);
+        output << ",\n      \"z\": " << node.zOrder << "\n    }"
+               << (index + 1U == nodes_.size() ? "\n" : ",\n");
+    }
+    output << "  ]\n}\n";
+    if (!output) {
+        error = "could not write calibration file: " + definitionPath_.string();
+        return false;
+    }
+    return true;
+}
+
 float Rig2D::globalScale() const noexcept {
-    return settings_.globalScale;
+    return effectiveScale_;
+}
+
+float Rig2D::neutralHeight() const noexcept {
+    return neutralHeight_ * effectiveScale_;
 }
 
 float Rig2D::targetHeight() const noexcept {
     return settings_.targetHeight;
+}
+
+SDL_FPoint Rig2D::rootToGround() const noexcept {
+    return settings_.rootToGround;
 }
 
 const std::filesystem::path& Rig2D::definitionPath() const noexcept {

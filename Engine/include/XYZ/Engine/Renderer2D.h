@@ -31,8 +31,20 @@ public:
     bool drawTexture(
         const Texture& texture,
         const SDL_FRect& destination,
+        SDL_Color modulation,
+        bool flipHorizontal = false) const;
+    bool drawTexture(
+        const Texture& texture,
+        const SDL_FRect& destination,
         float rotationDegrees,
         const SDL_FPoint& center,
+        bool flipHorizontal = false) const;
+    bool drawTexture(
+        const Texture& texture,
+        const SDL_FRect& destination,
+        float rotationDegrees,
+        const SDL_FPoint& center,
+        SDL_Color modulation,
         bool flipHorizontal = false) const;
     bool drawDebugLine(SDL_FPoint start, SDL_FPoint end, SDL_Color color) const;
     bool drawDebugRect(const SDL_FRect& rectangle, SDL_Color color) const;

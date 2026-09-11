@@ -47,7 +47,8 @@ int main() {
         const float leftRotation = -18.0F + static_cast<float>(index) * 5.0F;
         const float rightRotation = 18.0F - static_cast<float>(index) * 5.0F;
         walkJson +=
-            "{\"phase\":" + std::to_string(static_cast<float>(index) / 8.0F)
+            "{\"label\":\"pose_" + std::to_string(index + 1)
+            + "\",\"phase\":" + std::to_string(static_cast<float>(index) / 8.0F)
             + ",\"nodes\":{\"left_thigh\":{\"position\":[0,0],\"rotation\":"
             + std::to_string(leftRotation)
             + ",\"scale\":[1,1]},\"right_thigh\":{\"position\":[0,0],\"rotation\":"
@@ -61,6 +62,7 @@ int main() {
     xyz::engine::RigAnimation walk;
     check(walk.load(walkPath, error), error.c_str());
     check(walk.keyframeCount() == 8, "walk has eight keyframes");
+    check(walk.keyframeLabel(0) == "pose_1", "keyframes expose labels");
     const auto halfway = walk.sample(0.0625F);
     check(std::fabs(halfway.nodes.at("left_thigh").rotationDegrees + 15.5F) < 0.001F,
           "poses interpolate");
@@ -71,6 +73,7 @@ int main() {
     check(std::fabs(animator.phase()) < 0.001F, "one stride loops phase");
     animator.advanceByDistance(walk.strideDistance() * 0.5F);
     check(std::fabs(animator.phase() - 0.5F) < 0.001F, "walk phase uses distance");
+    const float savedWalkPhase = animator.phase();
 
     const auto idlePath = writeFile(
         testDirectory,
@@ -87,12 +90,22 @@ int main() {
 })");
     xyz::engine::RigAnimation idle;
     check(idle.load(idlePath, error), error.c_str());
-    animator.setAnimation(&idle);
+    animator.setAnimation(&idle, 0.12F, true);
+    check(animator.isBlending(), "animation changes blend instead of snapping");
     animator.reset();
     animator.advanceByTime(1.2F);
     check(std::fabs(animator.phase() - 0.5F) < 0.001F, "idle phase uses duration");
     check(std::fabs(animator.pose().nodes.at("torso").positionOffset.y + 1.0F) < 0.001F,
           "idle samples its keyframe");
+    animator.setAnimation(&walk, 0.0F, true);
+    check(std::fabs(animator.phase() - savedWalkPhase) < 0.001F,
+          "walk phase is preserved across idle transition");
+    animator.setPaused(true);
+    const float pausedPhase = animator.phase();
+    animator.advanceByDistance(12.0F);
+    check(std::fabs(animator.phase() - pausedPhase) < 0.001F, "paused rig does not advance");
+    animator.advanceKeyframe(1);
+    check(animator.keyframeIndex() == 5, "paused pose stepping advances one keyframe");
 
     const auto invalidPath = writeFile(
         testDirectory,

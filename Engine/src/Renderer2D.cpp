@@ -78,12 +78,27 @@ void Renderer2D::present() const {
 }
 
 bool Renderer2D::drawTexture(const Texture& texture, const SDL_FRect& destination, bool flipHorizontal) const {
-    if (renderer_ == nullptr || texture.native() == nullptr) {
-        return false;
-    }
+    return drawTexture(
+        texture,
+        destination,
+        0.0F,
+        {destination.w / 2.0F, destination.h / 2.0F},
+        {255, 255, 255, SDL_ALPHA_OPAQUE},
+        flipHorizontal);
+}
 
-    const SDL_FPoint center{destination.w / 2.0F, destination.h / 2.0F};
-    return drawTexture(texture, destination, 0.0F, center, flipHorizontal);
+bool Renderer2D::drawTexture(
+    const Texture& texture,
+    const SDL_FRect& destination,
+    SDL_Color modulation,
+    bool flipHorizontal) const {
+    return drawTexture(
+        texture,
+        destination,
+        0.0F,
+        {destination.w / 2.0F, destination.h / 2.0F},
+        modulation,
+        flipHorizontal);
 }
 
 bool Renderer2D::drawTexture(
@@ -92,11 +107,38 @@ bool Renderer2D::drawTexture(
     float rotationDegrees,
     const SDL_FPoint& center,
     bool flipHorizontal) const {
+    return drawTexture(
+        texture,
+        destination,
+        rotationDegrees,
+        center,
+        {255, 255, 255, SDL_ALPHA_OPAQUE},
+        flipHorizontal);
+}
+
+bool Renderer2D::drawTexture(
+    const Texture& texture,
+    const SDL_FRect& destination,
+    float rotationDegrees,
+    const SDL_FPoint& center,
+    SDL_Color modulation,
+    bool flipHorizontal) const {
     if (renderer_ == nullptr || texture.native() == nullptr) {
         return false;
     }
 
-    return SDL_RenderTextureRotated(
+    Uint8 previousR = 255;
+    Uint8 previousG = 255;
+    Uint8 previousB = 255;
+    Uint8 previousA = SDL_ALPHA_OPAQUE;
+    if (!SDL_GetTextureColorMod(texture.native(), &previousR, &previousG, &previousB)
+        || !SDL_GetTextureAlphaMod(texture.native(), &previousA)
+        || !SDL_SetTextureColorMod(texture.native(), modulation.r, modulation.g, modulation.b)
+        || !SDL_SetTextureAlphaMod(texture.native(), modulation.a)) {
+        return false;
+    }
+
+    const bool drawn = SDL_RenderTextureRotated(
         renderer_,
         texture.native(),
         nullptr,
@@ -104,6 +146,10 @@ bool Renderer2D::drawTexture(
         static_cast<double>(rotationDegrees),
         &center,
         flipHorizontal ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+    const bool restored = SDL_SetTextureColorMod(
+                              texture.native(), previousR, previousG, previousB)
+        && SDL_SetTextureAlphaMod(texture.native(), previousA);
+    return drawn && restored;
 }
 
 bool Renderer2D::drawDebugLine(SDL_FPoint start, SDL_FPoint end, SDL_Color color) const {

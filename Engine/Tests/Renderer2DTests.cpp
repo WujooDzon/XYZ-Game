@@ -39,6 +39,11 @@ int main() {
                   15.0F,
                   {8.0F, 8.0F}),
               "pivot-aware texture draws");
+        check(renderer.drawTexture(
+                  texture,
+                  {25.0F, 25.0F, 40.0F, 40.0F},
+                  SDL_Color{255, 255, 255, 96}),
+              "modulated texture draws");
         check(renderer.drawDebugLine(
                   {10.0F, 10.0F},
                   {20.0F, 20.0F},

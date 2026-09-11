@@ -13,7 +13,7 @@ namespace xyz::game {
 namespace {
 
 std::filesystem::path rigDirectory(const std::filesystem::path& root) {
-    return root / "Assets" / "Characters" / "Logen" / "Rig";
+    return root / "Assets" / "Characters" / "Logen" / "RigV3";
 }
 
 const char* supportFootName(FootPlantController::SupportFoot foot) {
@@ -65,9 +65,9 @@ bool GuffmanBasementScene::initialize(engine::Renderer2D& renderer, std::string&
 
 bool GuffmanBasementScene::reloadRig(engine::Renderer2D& renderer, std::string& error) {
     const std::filesystem::path directory = rigDirectory(projectRoot_);
-    const std::filesystem::path definitionPath = directory / "Logen_rig_definition.json";
-    const std::filesystem::path walkPath = directory / "Logen_walk.json";
-    const std::filesystem::path idlePath = directory / "Logen_idle.json";
+    const std::filesystem::path definitionPath = directory / "Logen_rig_v3_definition.json";
+    const std::filesystem::path walkPath = directory / "Logen_walk_v3.json";
+    const std::filesystem::path idlePath = directory / "Logen_idle_v3.json";
 
     engine::Rig2D loadedRig;
     engine::RigAnimation loadedWalk;
@@ -256,8 +256,8 @@ void GuffmanBasementScene::update(
     const bool renderWalking = walking_ || settling;
     const float plantPhase = walking_ ? rigAnimator_.phase() : lastWalkPhase_;
     const auto footState = footPlant_.update(
-        playerRig_.footContactPosition("left_boot", rigAnimator_.pose()).x,
-        playerRig_.footContactPosition("right_boot", rigAnimator_.pose()).x,
+        playerRig_.footContactPosition("near_boot", rigAnimator_.pose()).x,
+        playerRig_.footContactPosition("far_boot", rigAnimator_.pose()).x,
         plantPhase,
         renderWalking,
         deltaSeconds);

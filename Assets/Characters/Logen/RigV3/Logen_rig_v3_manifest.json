@@ -1,0 +1,74 @@
+{
+  "rig": "logen_cutout_rig",
+  "version": 3,
+  "character": "Logen",
+  "reference": "../Logen_Master_Right_v1.png",
+  "camera": "side_profile_90",
+  "facing": "right",
+  "target_height_px": 188,
+  "sampling": "nearest",
+  "transparent_padding_px": 24,
+  "notes": [
+    "All parts share one strict right-facing side-profile construction.",
+    "The right sleeve is intentionally empty; no right hand or forearm art is present.",
+    "Far-side leg parts are restrained value reductions of their near-side counterparts."
+  ],
+  "parts": [
+    {
+      "filename": "Logen_rig_v3_body_shell.png",
+      "role": "stable_shell_empty_right_sleeve",
+      "overlap_px": 48
+    },
+    {
+      "filename": "Logen_rig_v3_left_arm.png",
+      "role": "intact_left_arm",
+      "overlap_px": 42
+    },
+    {
+      "filename": "Logen_rig_v3_cloak_tail.png",
+      "role": "cloak_tail_back",
+      "overlap_px": 36
+    },
+    {
+      "filename": "Logen_rig_v3_cloak_front.png",
+      "role": "cloak_front_panel",
+      "overlap_px": 32
+    },
+    {
+      "filename": "Logen_rig_v3_far_thigh.png",
+      "role": "far_thigh",
+      "overlap_px": 28,
+      "derived_from": "Logen_rig_v3_near_thigh.png",
+      "value_factor": 0.78
+    },
+    {
+      "filename": "Logen_rig_v3_far_shin.png",
+      "role": "far_shin",
+      "overlap_px": 28,
+      "derived_from": "Logen_rig_v3_near_shin.png",
+      "value_factor": 0.78
+    },
+    {
+      "filename": "Logen_rig_v3_far_boot.png",
+      "role": "far_boot",
+      "overlap_px": 24,
+      "derived_from": "Logen_rig_v3_near_boot.png",
+      "value_factor": 0.78
+    },
+    {
+      "filename": "Logen_rig_v3_near_thigh.png",
+      "role": "near_thigh",
+      "overlap_px": 28
+    },
+    {
+      "filename": "Logen_rig_v3_near_shin.png",
+      "role": "near_shin",
+      "overlap_px": 28
+    },
+    {
+      "filename": "Logen_rig_v3_near_boot.png",
+      "role": "near_boot",
+      "overlap_px": 24
+    }
+  ]
+}

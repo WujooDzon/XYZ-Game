@@ -32,7 +32,7 @@ int main() {
         std::string error;
         check(scene.initialize(renderer, error), error.c_str());
         check(!scene.usesLegacyWalkFrames(), "scene uses hierarchical rig instead of legacy frames");
-        check(scene.rigNodeCount() == 16, "rig definition contains pelvis and all 15 active art parts");
+        check(scene.rigNodeCount() == 11, "V3 rig contains pelvis and exactly 10 active art parts");
         check(scene.walkKeyframeCount() == 8, "walk animation contains eight poses");
         check(scene.idleKeyframeCount() >= 2, "idle animation contains looping poses");
         check(scene.rigHeight() >= 182.0F && scene.rigHeight() <= 194.0F,

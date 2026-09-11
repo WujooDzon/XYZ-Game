@@ -1,0 +1,42 @@
+{
+  "name": "idle",
+  "loop": true,
+  "stride_distance": 72.0,
+  "duration_seconds": 2.4,
+  "keyframes": [
+    {
+      "label": "idle_neutral",
+      "phase": 0.0,
+      "nodes": {
+        "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "left_arm": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "cloak_tail": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "cloak_front": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "far_thigh": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "far_shin": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "far_boot": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "near_thigh": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "near_shin": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "near_boot": {"position": [0, 0], "rotation": 0, "scale": [1, 1]}
+      }
+    },
+    {
+      "label": "idle_breathe",
+      "phase": 0.5,
+      "nodes": {
+        "pelvis": {"position": [0, 1], "rotation": 0, "scale": [1, 1]},
+        "body_shell": {"position": [0, -1], "rotation": 0.35, "scale": [1.0, 0.995]},
+        "left_arm": {"position": [0, 0], "rotation": -0.8, "scale": [1, 1]},
+        "cloak_tail": {"position": [0, 1], "rotation": 0.25, "scale": [1, 1]},
+        "cloak_front": {"position": [0, 1], "rotation": 0.2, "scale": [1, 1]},
+        "far_thigh": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "far_shin": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "far_boot": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "near_thigh": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "near_shin": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "near_boot": {"position": [0, 0], "rotation": 0, "scale": [1, 1]}
+      }
+    }
+  ]
+}

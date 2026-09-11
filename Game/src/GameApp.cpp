@@ -46,35 +46,30 @@ std::filesystem::path firstProjectRootFrom(std::filesystem::path candidate) {
     return {};
 }
 
-std::vector<std::filesystem::path> stage01BAssetPaths(const std::filesystem::path& root) {
+std::vector<std::filesystem::path> stage01CAssetPaths(const std::filesystem::path& root) {
     const std::filesystem::path characterDirectory = root / "Assets" / "Characters" / "Logen";
+    const std::filesystem::path rigDirectory = characterDirectory / "RigV3";
     std::vector<std::filesystem::path> paths{
         root / "Assets" / "Locations" / "GuffmanBasement" / "GuffmanBasement_BG_v1.png",
         characterDirectory / "Logen_Master_Right_v1.png",
-        characterDirectory / "Logen_Rig_v2_manifest.json",
-        characterDirectory / "Rig" / "Logen_rig_definition.json",
-        characterDirectory / "Rig" / "Logen_walk.json",
-        characterDirectory / "Rig" / "Logen_idle.json"};
+        rigDirectory / "Logen_rig_v3_manifest.json",
+        rigDirectory / "Logen_rig_v3_definition.json",
+        rigDirectory / "Logen_walk_v3.json",
+        rigDirectory / "Logen_idle_v3.json"};
 
     const std::vector<std::string> rigParts{
-        "Logen_rig_cloak_back_full.png",
-        "Logen_rig_cloak_front_left.png",
-        "Logen_rig_cloak_front_right.png",
-        "Logen_rig_head_mask_hood.png",
-        "Logen_rig_left_boot.png",
-        "Logen_rig_left_forearm_hand.png",
-        "Logen_rig_left_shin.png",
-        "Logen_rig_left_thigh.png",
-        "Logen_rig_left_upper_arm.png",
-        "Logen_rig_red_cloth_front.png",
-        "Logen_rig_right_boot.png",
-        "Logen_rig_right_empty_sleeve.png",
-        "Logen_rig_right_shin.png",
-        "Logen_rig_right_thigh.png",
-        "Logen_rig_torso_upper.png",
-        "Logen_rig_waist_belt_front.png"};
+        "Logen_rig_v3_body_shell.png",
+        "Logen_rig_v3_left_arm.png",
+        "Logen_rig_v3_cloak_tail.png",
+        "Logen_rig_v3_cloak_front.png",
+        "Logen_rig_v3_far_thigh.png",
+        "Logen_rig_v3_far_shin.png",
+        "Logen_rig_v3_far_boot.png",
+        "Logen_rig_v3_near_thigh.png",
+        "Logen_rig_v3_near_shin.png",
+        "Logen_rig_v3_near_boot.png"};
     for (const std::string& filename : rigParts) {
-        paths.push_back(characterDirectory / filename);
+        paths.push_back(rigDirectory / filename);
     }
     return paths;
 }
@@ -117,21 +112,21 @@ int GameApp::run(int argc, char** argv) const {
 }
 
 int GameApp::runSelfTest() const {
-    for (const auto& path : stage01BAssetPaths(projectRoot_)) {
+    for (const auto& path : stage01CAssetPaths(projectRoot_)) {
         if (!std::filesystem::is_regular_file(path)) {
-            std::cerr << "Stage 01C self-test missing asset: " << path.string() << "\n";
+            std::cerr << "Stage 01C self-test missing Rig V3 asset: " << path.string() << "\n";
             return 1;
         }
     }
 
     const std::filesystem::path rigDirectory =
-        projectRoot_ / "Assets" / "Characters" / "Logen" / "Rig";
+        projectRoot_ / "Assets" / "Characters" / "Logen" / "RigV3";
     std::string error;
     const auto parseObject = [&](const std::filesystem::path& path,
                                  const char* label) -> std::optional<engine::JsonValue> {
         auto document = engine::JsonValue::parseFile(path, error);
         if (!document.has_value() || !document->isObject()) {
-        std::cerr << "Stage 01C self-test invalid " << label << ": "
+            std::cerr << "Stage 01C self-test invalid Rig V3 " << label << ": "
                       << (error.empty() ? path.string() : error) << "\n";
             return std::nullopt;
         }
@@ -139,7 +134,7 @@ int GameApp::runSelfTest() const {
     };
 
     const auto definition = parseObject(
-        rigDirectory / "Logen_rig_definition.json", "rig definition");
+        rigDirectory / "Logen_rig_v3_definition.json", "rig definition");
     if (!definition.has_value()) {
         return 1;
     }
@@ -151,31 +146,26 @@ int GameApp::runSelfTest() const {
         || std::fabs(targetHeight->number() - 188.0) > 0.001
         || rootToGround == nullptr || !rootToGround->isArray()
         || rootToGround->array().size() != 2U) {
-        std::cerr << "Stage 01C self-test requires target_height 188 and root_to_ground\n";
+        std::cerr << "Stage 01C self-test requires Rig V3 target_height 188 and root_to_ground\n";
         return 1;
     }
     const std::set<std::string> expectedParts{
-        "Logen_rig_cloak_back_full.png",
-        "Logen_rig_cloak_front_left.png",
-        "Logen_rig_cloak_front_right.png",
-        "Logen_rig_head_mask_hood.png",
-        "Logen_rig_left_boot.png",
-        "Logen_rig_left_forearm_hand.png",
-        "Logen_rig_left_shin.png",
-        "Logen_rig_left_thigh.png",
-        "Logen_rig_left_upper_arm.png",
-        "Logen_rig_right_boot.png",
-        "Logen_rig_right_empty_sleeve.png",
-        "Logen_rig_right_shin.png",
-        "Logen_rig_right_thigh.png",
-        "Logen_rig_torso_upper.png",
-        "Logen_rig_waist_belt_front.png"};
+        "Logen_rig_v3_body_shell.png",
+        "Logen_rig_v3_left_arm.png",
+        "Logen_rig_v3_cloak_tail.png",
+        "Logen_rig_v3_cloak_front.png",
+        "Logen_rig_v3_far_thigh.png",
+        "Logen_rig_v3_far_shin.png",
+        "Logen_rig_v3_far_boot.png",
+        "Logen_rig_v3_near_thigh.png",
+        "Logen_rig_v3_near_shin.png",
+        "Logen_rig_v3_near_boot.png"};
     std::set<std::string> actualParts;
     bool hasPelvisRoot = false;
-    bool hasEmptyRightSleeve = false;
+    bool hasBodyShell = false;
     if (nodeValues == nullptr || !nodeValues->isArray()
         || nodeValues->array().size() != expectedParts.size() + 1U) {
-        std::cerr << "Stage 01C self-test expected pelvis plus 15 active rig parts\n";
+        std::cerr << "Stage 01C self-test expected Rig V3 pelvis plus 10 active rig parts\n";
         return 1;
     }
     for (const auto& node : nodeValues->array()) {
@@ -192,9 +182,9 @@ int GameApp::runSelfTest() const {
         }
         const std::string imageName = std::filesystem::path(image->string()).filename().string();
         actualParts.insert(imageName);
-        if (id->string() == "right_empty_sleeve"
-            && imageName == "Logen_rig_right_empty_sleeve.png") {
-            hasEmptyRightSleeve = true;
+        if (id->string() == "body_shell"
+            && imageName == "Logen_rig_v3_body_shell.png") {
+            hasBodyShell = true;
         }
         if (id->string().find("right_hand") != std::string::npos
             || imageName.find("right_hand") != std::string::npos
@@ -203,13 +193,13 @@ int GameApp::runSelfTest() const {
             return 1;
         }
     }
-    if (!hasPelvisRoot || !hasEmptyRightSleeve || actualParts != expectedParts) {
-        std::cerr << "Stage 01C self-test rig nodes do not match calibrated active parts\n";
+    if (!hasPelvisRoot || !hasBodyShell || actualParts != expectedParts) {
+        std::cerr << "Stage 01C self-test Rig V3 nodes do not match active parts\n";
         return 1;
     }
 
-    const auto walk = parseObject(rigDirectory / "Logen_walk.json", "walk animation");
-    const auto idle = parseObject(rigDirectory / "Logen_idle.json", "idle animation");
+    const auto walk = parseObject(rigDirectory / "Logen_walk_v3.json", "walk animation");
+    const auto idle = parseObject(rigDirectory / "Logen_idle_v3.json", "idle animation");
     if (!walk.has_value() || !idle.has_value()) {
         return 1;
     }
@@ -242,8 +232,8 @@ int GameApp::runSelfTest() const {
 
     engine::RigAnimation walkAnimation;
     engine::RigAnimation idleAnimation;
-    if (!walkAnimation.load(rigDirectory / "Logen_walk.json", error)
-        || !idleAnimation.load(rigDirectory / "Logen_idle.json", error)) {
+    if (!walkAnimation.load(rigDirectory / "Logen_walk_v3.json", error)
+        || !idleAnimation.load(rigDirectory / "Logen_idle_v3.json", error)) {
         std::cerr << "Stage 01C self-test animation load failed: " << error << "\n";
         return 1;
     }

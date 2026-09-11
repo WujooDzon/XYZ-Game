@@ -7,28 +7,24 @@ trap 'rm -rf "$ACCEPTANCE_DIR"' EXIT
 
 printf '%s\n' "== Stage 01C calibrated rig assets =="
 CHARACTER_DIR="$ROOT_DIR/Assets/Characters/Logen"
+RIG_DIR="$CHARACTER_DIR/RigV3"
 test -f "$CHARACTER_DIR/Logen_Master_Right_v1.png"
-test -f "$CHARACTER_DIR/Rig/Logen_rig_definition.json"
-test -f "$CHARACTER_DIR/Rig/Logen_walk.json"
-test -f "$CHARACTER_DIR/Rig/Logen_idle.json"
+test -f "$RIG_DIR/Logen_rig_v3_manifest.json"
+test -f "$RIG_DIR/Logen_rig_v3_definition.json"
+test -f "$RIG_DIR/Logen_walk_v3.json"
+test -f "$RIG_DIR/Logen_idle_v3.json"
 for RIG_PART in \
-    Logen_rig_cloak_back_full.png \
-    Logen_rig_cloak_front_left.png \
-    Logen_rig_cloak_front_right.png \
-    Logen_rig_head_mask_hood.png \
-    Logen_rig_left_boot.png \
-    Logen_rig_left_forearm_hand.png \
-    Logen_rig_left_shin.png \
-    Logen_rig_left_thigh.png \
-    Logen_rig_left_upper_arm.png \
-    Logen_rig_red_cloth_front.png \
-    Logen_rig_right_boot.png \
-    Logen_rig_right_empty_sleeve.png \
-    Logen_rig_right_shin.png \
-    Logen_rig_right_thigh.png \
-    Logen_rig_torso_upper.png \
-    Logen_rig_waist_belt_front.png; do
-    test -f "$CHARACTER_DIR/$RIG_PART"
+    Logen_rig_v3_body_shell.png \
+    Logen_rig_v3_left_arm.png \
+    Logen_rig_v3_cloak_tail.png \
+    Logen_rig_v3_cloak_front.png \
+    Logen_rig_v3_far_thigh.png \
+    Logen_rig_v3_far_shin.png \
+    Logen_rig_v3_far_boot.png \
+    Logen_rig_v3_near_thigh.png \
+    Logen_rig_v3_near_shin.png \
+    Logen_rig_v3_near_boot.png; do
+    test -f "$RIG_DIR/$RIG_PART"
 done
 ! rg -q 'Logen_walk_right_0[1-8]\.png' "$ROOT_DIR/Game/src" "$ROOT_DIR/Game/include"
 

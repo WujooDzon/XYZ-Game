@@ -1,0 +1,140 @@
+{
+  "global_scale": 1.0,
+  "target_height": 188.0,
+  "root_to_ground": [0.0, 1120.0],
+  "nodes": [
+    {
+      "id": "pelvis",
+      "parent": null,
+      "image": "",
+      "position": [0.0, 0.0],
+      "pivot": [0.5, 0.5],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 0,
+      "role": "gameplay_root"
+    },
+    {
+      "id": "body_shell",
+      "parent": "pelvis",
+      "image": "Logen_rig_v3_body_shell.png",
+      "position": [0.0, 0.0],
+      "pivot": [0.52, 1.0],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 30,
+      "role": "stable_shell_empty_right_sleeve",
+      "overlap_px": 48
+    },
+    {
+      "id": "left_arm",
+      "parent": "body_shell",
+      "image": "Logen_rig_v3_left_arm.png",
+      "position": [-205.0, -690.0],
+      "pivot": [0.50, 0.07],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 50,
+      "role": "intact_left_arm",
+      "overlap_px": 42
+    },
+    {
+      "id": "cloak_tail",
+      "parent": "pelvis",
+      "image": "Logen_rig_v3_cloak_tail.png",
+      "position": [-175.0, -850.0],
+      "pivot": [0.52, 0.03],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 5,
+      "role": "cloak_tail_back",
+      "overlap_px": 36
+    },
+    {
+      "id": "cloak_front",
+      "parent": "pelvis",
+      "image": "Logen_rig_v3_cloak_front.png",
+      "position": [65.0, -520.0],
+      "pivot": [0.50, 0.03],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 20,
+      "role": "cloak_front_panel",
+      "overlap_px": 32
+    },
+    {
+      "id": "far_thigh",
+      "parent": "pelvis",
+      "image": "Logen_rig_v3_far_thigh.png",
+      "position": [-58.0, 0.0],
+      "pivot": [0.50, 0.05],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 10,
+      "role": "far_thigh",
+      "overlap_px": 28
+    },
+    {
+      "id": "far_shin",
+      "parent": "far_thigh",
+      "image": "Logen_rig_v3_far_shin.png",
+      "position": [0.0, 420.0],
+      "pivot": [0.50, 0.05],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 11,
+      "role": "far_shin",
+      "overlap_px": 28
+    },
+    {
+      "id": "far_boot",
+      "parent": "far_shin",
+      "image": "Logen_rig_v3_far_boot.png",
+      "position": [12.0, 505.0],
+      "pivot": [0.18, 0.12],
+      "ground_contact": [0.90, 0.98],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 12,
+      "role": "far_boot",
+      "overlap_px": 24
+    },
+    {
+      "id": "near_thigh",
+      "parent": "pelvis",
+      "image": "Logen_rig_v3_near_thigh.png",
+      "position": [48.0, 0.0],
+      "pivot": [0.50, 0.05],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 20,
+      "role": "near_thigh",
+      "overlap_px": 28
+    },
+    {
+      "id": "near_shin",
+      "parent": "near_thigh",
+      "image": "Logen_rig_v3_near_shin.png",
+      "position": [0.0, 420.0],
+      "pivot": [0.50, 0.05],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 21,
+      "role": "near_shin",
+      "overlap_px": 28
+    },
+    {
+      "id": "near_boot",
+      "parent": "near_shin",
+      "image": "Logen_rig_v3_near_boot.png",
+      "position": [12.0, 505.0],
+      "pivot": [0.18, 0.12],
+      "ground_contact": [0.90, 0.98],
+      "rotation": 0.0,
+      "scale": [1.0, 1.0],
+      "z": 22,
+      "role": "near_boot",
+      "overlap_px": 24
+    }
+  ]
+}

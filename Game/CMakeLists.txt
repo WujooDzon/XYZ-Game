@@ -38,3 +38,11 @@ add_executable(XYZFootPlantControllerTests
 target_include_directories(XYZFootPlantControllerTests PRIVATE include)
 target_link_libraries(XYZFootPlantControllerTests PRIVATE XYZEngine)
 add_test(NAME XYZFootPlantControllerTests COMMAND XYZFootPlantControllerTests)
+
+add_executable(XYZLogenRigV3AssetTests
+    Tests/LogenRigV3AssetTests.cpp
+)
+
+target_link_libraries(XYZLogenRigV3AssetTests PRIVATE XYZEngine)
+add_test(NAME XYZLogenRigV3AssetTests COMMAND XYZLogenRigV3AssetTests)
+set_tests_properties(XYZLogenRigV3AssetTests PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

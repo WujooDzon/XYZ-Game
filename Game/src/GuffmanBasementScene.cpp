@@ -8,6 +8,7 @@
 
 #include "XYZ/Engine/Input.h"
 #include "XYZ/Engine/Renderer2D.h"
+#include "XYZ/Game/RigReviewExporter.h"
 
 namespace xyz::game {
 namespace {
@@ -16,16 +17,44 @@ std::filesystem::path rigDirectory(const std::filesystem::path& root) {
     return root / "Assets" / "Characters" / "Logen" / "RigV3";
 }
 
-const char* supportFootName(FootPlantController::SupportFoot foot) {
+const char* supportFootName(FootPlantController::SupportFoot foot, bool walking) {
     switch (foot) {
-        case FootPlantController::SupportFoot::Left:
-            return "left";
-        case FootPlantController::SupportFoot::Right:
-            return "right";
+        case FootPlantController::SupportFoot::Near:
+            return "NEAR";
+        case FootPlantController::SupportFoot::Far:
+            return "FAR";
         case FootPlantController::SupportFoot::None:
-            return "none";
+            return walking ? "TRANSFER" : "NONE";
     }
-    return "none";
+    return "NONE";
+}
+
+const char* displayWalkPoseLabel(std::string_view label) {
+    if (label == "contact_a") {
+        return "CONTACT A";
+    }
+    if (label == "down_a") {
+        return "DOWN A";
+    }
+    if (label == "passing_a") {
+        return "PASSING A";
+    }
+    if (label == "up_a") {
+        return "UP A";
+    }
+    if (label == "contact_b") {
+        return "CONTACT B";
+    }
+    if (label == "down_b") {
+        return "DOWN B";
+    }
+    if (label == "passing_b") {
+        return "PASSING B";
+    }
+    if (label == "up_b") {
+        return "UP B";
+    }
+    return "UNKNOWN";
 }
 
 } // namespace
@@ -59,6 +88,7 @@ bool GuffmanBasementScene::initialize(engine::Renderer2D& renderer, std::string&
     playerRig_.setVisualRootCorrectionX(0.0F);
     playerRig_.setMirrored(player_.facing() == Facing::Left);
     footPlant_.reset();
+    rigReviewError_.clear();
     initialized_ = true;
     return true;
 }
@@ -102,6 +132,7 @@ bool GuffmanBasementScene::reloadRig(engine::Renderer2D& renderer, std::string& 
     playerRig_.setMirrored(player_.facing() == Facing::Left);
     footPlant_.reset();
     lastWalkPhase_ = 0.0F;
+    rigReviewError_.clear();
     return true;
 }
 
@@ -190,6 +221,13 @@ void GuffmanBasementScene::update(
     if (input.masterReferenceTogglePressed()) {
         masterReferenceEnabled_ = !masterReferenceEnabled_;
     }
+    if (input.footPlantTogglePressed()) {
+        footPlantEnabled_ = !footPlantEnabled_;
+        if (!footPlantEnabled_) {
+            footPlant_.reset();
+            playerRig_.setVisualRootCorrectionX(0.0F);
+        }
+    }
     if (input.rigPauseTogglePressed()) {
         const bool pause = !rigAnimator_.paused();
         rigAnimator_.setPaused(pause);
@@ -255,15 +293,41 @@ void GuffmanBasementScene::update(
     const bool settling = !walking_ && rigAnimator_.isBlending();
     const bool renderWalking = walking_ || settling;
     const float plantPhase = walking_ ? rigAnimator_.phase() : lastWalkPhase_;
-    const auto footState = footPlant_.update(
-        playerRig_.footContactPosition("near_boot", rigAnimator_.pose()).x,
-        playerRig_.footContactPosition("far_boot", rigAnimator_.pose()).x,
-        plantPhase,
-        renderWalking,
-        deltaSeconds);
-    playerRig_.setVisualRootCorrectionX(footState.rootCorrectionX);
-    if (!renderWalking) {
+    if (footPlantEnabled_) {
+        const auto footState = footPlant_.update(
+            playerRig_.footContactPosition("near_boot", rigAnimator_.pose()).x,
+            playerRig_.footContactPosition("far_boot", rigAnimator_.pose()).x,
+            plantPhase,
+            renderWalking,
+            deltaSeconds);
+        playerRig_.setVisualRootCorrectionX(footState.rootCorrectionX);
+        if (!renderWalking) {
+            playerRig_.setVisualRootCorrectionX(0.0F);
+        }
+    } else {
+        footPlant_.reset();
         playerRig_.setVisualRootCorrectionX(0.0F);
+    }
+
+    if (input.rigReviewCapturePressed()) {
+        RigReviewExporter exporter;
+        if (!exporter.exportWalkReview(
+                renderer,
+                playerRig_,
+                idleRigAnimation_,
+                walkRigAnimation_,
+                projectRoot_ / "Build" / "RigReview",
+                rigReviewError_)) {
+            if (rigReviewError_.empty()) {
+                rigReviewError_ = "Rig review export failed.";
+            }
+        } else {
+            rigReviewError_.clear();
+        }
+        playerRig_.setRootPosition({player_.x(), player_.baselineY()});
+        playerRig_.setVisualRootCorrectionX(
+            footPlantEnabled_ && renderWalking ? footPlant_.state().rootCorrectionX : 0.0F);
+        playerRig_.setMirrored(player_.facing() == Facing::Left);
     }
 
     if (deltaSeconds > 0.0F) {
@@ -327,6 +391,7 @@ void GuffmanBasementScene::render(engine::Renderer2D& renderer) const {
         player_.facing() == Facing::Left ? "Facing: left" : "Facing: right");
 
     if (rigDebugEnabled_) {
+        const bool renderWalking = walking_ || rigAnimator_.isBlending();
         const bool debugWalkAnimation = rigAnimator_.animationName() == "walk";
         const std::size_t debugPoseCount = debugWalkAnimation
             ? walkRigAnimation_.keyframeCount()
@@ -336,7 +401,12 @@ void GuffmanBasementScene::render(engine::Renderer2D& renderer) const {
                   << std::fixed << std::setprecision(3)
                   << (debugWalkAnimation ? rigAnimator_.phase() : rigAnimator_.phase())
                   << "  pose " << (rigAnimator_.keyframeIndex() + 1U) << "/"
-                  << debugPoseCount << " " << rigAnimator_.keyframeLabel();
+                  << debugPoseCount << " ";
+        if (debugWalkAnimation) {
+            phaseLine << displayWalkPoseLabel(rigAnimator_.keyframeLabel());
+        } else {
+            phaseLine << rigAnimator_.keyframeLabel();
+        }
         renderer.drawDebugText(12.0F, 76.0F, phaseLine.str());
 
         std::ostringstream velocityLine;
@@ -364,15 +434,32 @@ void GuffmanBasementScene::render(engine::Renderer2D& renderer) const {
                    << playerRig_.neutralHeight() << "/" << playerRig_.targetHeight();
         renderer.drawDebugText(12.0F, 140.0F, heightLine.str());
 
+        const auto footState = footPlant_.state();
         std::ostringstream footLine;
-        footLine << "Planted foot: " << supportFootName(footPlant_.state().support)
-                 << "  visual root X: " << std::fixed << std::setprecision(2)
-                 << footPlant_.state().rootCorrectionX;
+        footLine << "Foot plant: " << (footPlantEnabled_ ? "ON" : "OFF")
+                 << "  support: " << supportFootName(footState.support, renderWalking)
+                 << "  applied X: " << std::fixed << std::setprecision(2)
+                 << footState.rootCorrectionX;
         renderer.drawDebugText(12.0F, 156.0F, footLine.str());
+
+        std::ostringstream footTelemetryLine;
+        footTelemetryLine << "Near/Far X: " << std::fixed << std::setprecision(1)
+                          << footState.nearFootWorldX << "/" << footState.farFootWorldX
+                          << "  planted: " << footState.plantedWorldX
+                          << "  desired: " << footState.desiredCorrectionX;
+        renderer.drawDebugText(12.0F, 172.0F, footTelemetryLine.str());
+
+        const auto nearFoot = playerRig_.footContactPosition("near_boot", rigAnimator_.pose());
+        const auto farFoot = playerRig_.footContactPosition("far_boot", rigAnimator_.pose());
+        std::ostringstream footYLine;
+        footYLine << "Foot Y rel baseline N/F: " << std::fixed << std::setprecision(1)
+                  << (nearFoot.y - player_.baselineY()) << "/"
+                  << (farFoot.y - player_.baselineY());
+        renderer.drawDebugText(12.0F, 188.0F, footYLine.str());
 
         std::ostringstream masterLine;
         masterLine << "Master overlay: " << (masterReferenceEnabled_ ? "ON" : "OFF");
-        renderer.drawDebugText(12.0F, 172.0F, masterLine.str());
+        renderer.drawDebugText(12.0F, 204.0F, masterLine.str());
 
         const auto worlds = playerRig_.worldNodes(rigAnimator_.pose());
         const auto selected = std::find_if(
@@ -385,32 +472,54 @@ void GuffmanBasementScene::render(engine::Renderer2D& renderer) const {
         std::ostringstream selectedLine;
         selectedLine << "Selected: " << node.id << " parent ";
         selectedLine << (node.parentIndex < 0 ? "-" : playerRig_.nodes()[node.parentIndex].id);
-        renderer.drawDebugText(12.0F, 188.0F, selectedLine.str());
+        renderer.drawDebugText(12.0F, 220.0F, selectedLine.str());
         std::ostringstream localLine;
         localLine << "Local pos: " << std::fixed << std::setprecision(1)
                   << node.localPosition.x << "," << node.localPosition.y
                   << " pivot " << std::setprecision(2) << node.pivot.x << "," << node.pivot.y;
-        renderer.drawDebugText(12.0F, 204.0F, localLine.str());
+        renderer.drawDebugText(12.0F, 236.0F, localLine.str());
         std::ostringstream rotationLine;
         rotationLine << "Base rot: " << std::fixed << std::setprecision(1)
                      << node.baseRotationDegrees << " z " << node.zOrder;
-        renderer.drawDebugText(12.0F, 220.0F, rotationLine.str());
+        renderer.drawDebugText(12.0F, 252.0F, rotationLine.str());
         if (selected != worlds.end()) {
             std::ostringstream worldLine;
             worldLine << "World: " << std::fixed << std::setprecision(1)
                       << selected->position.x << "," << selected->position.y
                       << " rot " << selected->rotationDegrees;
-            renderer.drawDebugText(12.0F, 236.0F, worldLine.str());
+            renderer.drawDebugText(12.0F, 268.0F, worldLine.str());
         }
         renderer.drawDebugText(
             12.0F,
-            252.0F,
-            "TAB node  arrows move  Q/E rotate  J/L/I/K pivot  S save  F4 master  F5 pause");
+            284.0F,
+            "TAB node  arrows move  Q/E rotate  J/L/I/K pivot  S save  F4 master  F5 pause  F6 plant  F7 export");
+    }
+
+    if (!rigDebugEnabled_ && rigAnimator_.paused()
+        && rigAnimator_.animationName() == "walk") {
+        std::ostringstream pausedPoseLine;
+        pausedPoseLine << (rigAnimator_.keyframeIndex() + 1U) << "/"
+                       << walkRigAnimation_.keyframeCount() << " "
+                       << displayWalkPoseLabel(rigAnimator_.keyframeLabel());
+        renderer.drawDebugText(12.0F, 12.0F, pausedPoseLine.str());
+
+        const auto nearFoot = playerRig_.footContactPosition("near_boot", rigAnimator_.pose());
+        const auto farFoot = playerRig_.footContactPosition("far_boot", rigAnimator_.pose());
+        std::ostringstream pausedFeetLine;
+        pausedFeetLine << "Near/Far foot Y rel baseline: " << std::fixed
+                       << std::setprecision(1)
+                       << (nearFoot.y - player_.baselineY()) << "/"
+                       << (farFoot.y - player_.baselineY());
+        renderer.drawDebugText(12.0F, 28.0F, pausedFeetLine.str());
     }
 
     if (!rigReloadError_.empty()) {
-        renderer.drawDebugText(12.0F, 268.0F, "Rig calibration error:");
-        renderer.drawDebugText(12.0F, 284.0F, rigReloadError_);
+        renderer.drawDebugText(12.0F, 300.0F, "Rig calibration error:");
+        renderer.drawDebugText(12.0F, 316.0F, rigReloadError_);
+    }
+    if (!rigReviewError_.empty()) {
+        renderer.drawDebugText(12.0F, 332.0F, "Rig review export error:");
+        renderer.drawDebugText(12.0F, 348.0F, rigReviewError_);
     }
 }
 
@@ -502,6 +611,14 @@ FootPlantController::SupportFoot GuffmanBasementScene::plantedFoot() const noexc
 
 float GuffmanBasementScene::visualRootCorrectionX() const noexcept {
     return footPlant_.state().rootCorrectionX;
+}
+
+bool GuffmanBasementScene::footPlantCorrectionEnabled() const noexcept {
+    return footPlantEnabled_;
+}
+
+std::string_view GuffmanBasementScene::rigReviewError() const noexcept {
+    return rigReviewError_;
 }
 
 }

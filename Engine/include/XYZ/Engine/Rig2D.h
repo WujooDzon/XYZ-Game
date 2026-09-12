@@ -20,6 +20,7 @@ struct RigPoseTransform {
 };
 
 struct RigPose {
+    SDL_FPoint rootOffsetLogical{0.0F, 0.0F};
     std::map<std::string, RigPoseTransform> nodes;
 };
 

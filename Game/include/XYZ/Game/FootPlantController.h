@@ -6,18 +6,22 @@ class FootPlantController {
 public:
     enum class SupportFoot {
         None,
-        Left,
-        Right
+        Near,
+        Far
     };
 
     struct State {
         SupportFoot support = SupportFoot::None;
+        float nearFootWorldX = 0.0F;
+        float farFootWorldX = 0.0F;
+        float plantedWorldX = 0.0F;
+        float desiredCorrectionX = 0.0F;
         float rootCorrectionX = 0.0F;
     };
 
     State update(
-        float leftFootX,
-        float rightFootX,
+        float nearFootX,
+        float farFootX,
         float walkPhase,
         bool walking,
         float deltaSeconds) noexcept;
@@ -29,7 +33,10 @@ private:
     static float approach(float current, float target, float maxDelta) noexcept;
 
     SupportFoot support_ = SupportFoot::None;
+    float nearFootWorldX_ = 0.0F;
+    float farFootWorldX_ = 0.0F;
     float plantedWorldX_ = 0.0F;
+    float desiredCorrectionX_ = 0.0F;
     float rootCorrectionX_ = 0.0F;
 };
 

@@ -51,6 +51,8 @@ public:
     [[nodiscard]] std::size_t rigKeyframeIndex() const noexcept;
     [[nodiscard]] FootPlantController::SupportFoot plantedFoot() const noexcept;
     [[nodiscard]] float visualRootCorrectionX() const noexcept;
+    [[nodiscard]] bool footPlantCorrectionEnabled() const noexcept;
+    [[nodiscard]] std::string_view rigReviewError() const noexcept;
 
 private:
     bool reloadRig(engine::Renderer2D& renderer, std::string& error);
@@ -67,7 +69,9 @@ private:
     bool walking_ = false;
     bool rigDebugEnabled_ = false;
     bool masterReferenceEnabled_ = false;
+    bool footPlantEnabled_ = true;
     std::string rigReloadError_;
+    std::string rigReviewError_;
     std::size_t selectedRigNodeIndex_ = 0;
     FootPlantController footPlant_;
     float lastWalkPhase_ = 0.0F;

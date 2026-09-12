@@ -81,6 +81,20 @@ int main() {
     check(input.rigPauseTogglePressed(), "F5 reports rig pause toggle");
 
     input.beginFrame();
+    SDL_Event footPlantToggle = debugToggle;
+    footPlantToggle.key.scancode = SDL_SCANCODE_F6;
+    footPlantToggle.key.repeat = false;
+    input.handleEvent(footPlantToggle);
+    check(input.footPlantTogglePressed(), "F6 reports foot-plant toggle");
+
+    input.beginFrame();
+    SDL_Event rigReviewCapture = debugToggle;
+    rigReviewCapture.key.scancode = SDL_SCANCODE_F7;
+    rigReviewCapture.key.repeat = false;
+    input.handleEvent(rigReviewCapture);
+    check(input.rigReviewCapturePressed(), "F7 reports rig review capture");
+
+    input.beginFrame();
     SDL_Event tab = debugToggle;
     tab.key.scancode = SDL_SCANCODE_TAB;
     tab.key.mod = SDL_KMOD_SHIFT;

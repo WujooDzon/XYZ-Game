@@ -373,9 +373,12 @@ std::vector<RigWorldNode> Rig2D::evaluateWorldNodes(const RigPose& pose) const {
     }
     output.reserve(nodes_.size());
     const SDL_FPoint rootPosition{
-        std::round(gameplayRoot_.x) + quantize(visualRootCorrectionX_)
+        std::round(gameplayRoot_.x)
+            + quantize(visualRootCorrectionX_ + pose.rootOffsetLogical.x)
             - settings_.rootToGround.x * effectiveScale_,
-        std::round(gameplayRoot_.y) - settings_.rootToGround.y * effectiveScale_};
+        std::round(gameplayRoot_.y)
+            + quantize(pose.rootOffsetLogical.y)
+            - settings_.rootToGround.y * effectiveScale_};
     evaluateNode(
         rootIndex_,
         pose,
@@ -573,9 +576,12 @@ SDL_FRect Rig2D::bounds(const RigPose& pose) const {
     }
     if (!hasTexture) {
         const SDL_FPoint root{
-            std::round(gameplayRoot_.x) + quantize(visualRootCorrectionX_)
+            std::round(gameplayRoot_.x)
+                + quantize(visualRootCorrectionX_ + pose.rootOffsetLogical.x)
                 - settings_.rootToGround.x * effectiveScale_,
-            std::round(gameplayRoot_.y) - settings_.rootToGround.y * effectiveScale_};
+            std::round(gameplayRoot_.y)
+                + quantize(pose.rootOffsetLogical.y)
+                - settings_.rootToGround.y * effectiveScale_};
         return {root.x, root.y, 0.0F, 0.0F};
     }
     result.w = maximumX - result.x;

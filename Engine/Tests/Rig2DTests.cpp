@@ -90,6 +90,17 @@ int main() {
         check(child->position.x == 115.0F && child->position.y == 220.0F,
               "child position follows parent translation");
 
+        xyz::engine::RigPose logicalOffsetPose;
+        logicalOffsetPose.rootOffsetLogical = {4.0F, -2.0F};
+        const auto offsetWorld = rig.worldNodes(logicalOffsetPose);
+        const auto* offsetRoot = findWorldNode(offsetWorld, "root");
+        child = findWorldNode(offsetWorld, "child");
+        check(offsetRoot != nullptr && child != nullptr, "logical offset world nodes exist");
+        check(offsetRoot->position.x == 104.0F && offsetRoot->position.y == 198.0F,
+              "logical root offset applies before hierarchy evaluation");
+        check(child->position.x == 119.0F && child->position.y == 218.0F,
+              "logical root offset moves children without scaling the offset");
+
         xyz::engine::RigPose rotatedPose;
         rotatedPose.nodes["parent"].rotationDegrees = 90.0F;
         const auto rotatedWorld = rig.worldNodes(rotatedPose);

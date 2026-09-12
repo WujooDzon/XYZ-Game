@@ -1,5 +1,6 @@
 #include "XYZ/Game/GameApp.h"
 
+#include <array>
 #include <cmath>
 #include <cstdlib>
 #include <filesystem>
@@ -46,7 +47,7 @@ std::filesystem::path firstProjectRootFrom(std::filesystem::path candidate) {
     return {};
 }
 
-std::vector<std::filesystem::path> stage01CAssetPaths(const std::filesystem::path& root) {
+std::vector<std::filesystem::path> stage01DAssetPaths(const std::filesystem::path& root) {
     const std::filesystem::path characterDirectory = root / "Assets" / "Characters" / "Logen";
     const std::filesystem::path rigDirectory = characterDirectory / "RigV3";
     std::vector<std::filesystem::path> paths{
@@ -112,9 +113,9 @@ int GameApp::run(int argc, char** argv) const {
 }
 
 int GameApp::runSelfTest() const {
-    for (const auto& path : stage01CAssetPaths(projectRoot_)) {
+    for (const auto& path : stage01DAssetPaths(projectRoot_)) {
         if (!std::filesystem::is_regular_file(path)) {
-            std::cerr << "Stage 01C self-test missing Rig V3 asset: " << path.string() << "\n";
+            std::cerr << "Stage 01D self-test missing Rig V3 asset: " << path.string() << "\n";
             return 1;
         }
     }
@@ -126,7 +127,7 @@ int GameApp::runSelfTest() const {
                                  const char* label) -> std::optional<engine::JsonValue> {
         auto document = engine::JsonValue::parseFile(path, error);
         if (!document.has_value() || !document->isObject()) {
-            std::cerr << "Stage 01C self-test invalid Rig V3 " << label << ": "
+            std::cerr << "Stage 01D self-test invalid Rig V3 " << label << ": "
                       << (error.empty() ? path.string() : error) << "\n";
             return std::nullopt;
         }
@@ -146,7 +147,7 @@ int GameApp::runSelfTest() const {
         || std::fabs(targetHeight->number() - 188.0) > 0.001
         || rootToGround == nullptr || !rootToGround->isArray()
         || rootToGround->array().size() != 2U) {
-        std::cerr << "Stage 01C self-test requires Rig V3 target_height 188 and root_to_ground\n";
+        std::cerr << "Stage 01D self-test requires Rig V3 target_height 188 and root_to_ground\n";
         return 1;
     }
     const std::set<std::string> expectedParts{
@@ -165,7 +166,7 @@ int GameApp::runSelfTest() const {
     bool hasBodyShell = false;
     if (nodeValues == nullptr || !nodeValues->isArray()
         || nodeValues->array().size() != expectedParts.size() + 1U) {
-        std::cerr << "Stage 01C self-test expected Rig V3 pelvis plus 10 active rig parts\n";
+        std::cerr << "Stage 01D self-test expected Rig V3 pelvis plus 10 active rig parts\n";
         return 1;
     }
     for (const auto& node : nodeValues->array()) {
@@ -173,7 +174,7 @@ int GameApp::runSelfTest() const {
         const auto* image = node.find("image");
         if (!node.isObject() || id == nullptr || image == nullptr
             || !id->isString() || !image->isString()) {
-            std::cerr << "Stage 01C self-test found malformed rig node\n";
+            std::cerr << "Stage 01D self-test found malformed rig node\n";
             return 1;
         }
         if (id->string() == "pelvis") {
@@ -189,12 +190,12 @@ int GameApp::runSelfTest() const {
         if (id->string().find("right_hand") != std::string::npos
             || imageName.find("right_hand") != std::string::npos
             || imageName.find("right_forearm") != std::string::npos) {
-            std::cerr << "Stage 01C self-test found forbidden right hand art\n";
+            std::cerr << "Stage 01D self-test found forbidden right hand art\n";
             return 1;
         }
     }
     if (!hasPelvisRoot || !hasBodyShell || actualParts != expectedParts) {
-        std::cerr << "Stage 01C self-test Rig V3 nodes do not match active parts\n";
+        std::cerr << "Stage 01D self-test Rig V3 nodes do not match active parts\n";
         return 1;
     }
 
@@ -208,14 +209,39 @@ int GameApp::runSelfTest() const {
     if (walkName == nullptr || !walkName->isString() || walkName->string() != "walk"
         || walkKeyframes == nullptr || !walkKeyframes->isArray()
         || walkKeyframes->array().size() != 8U) {
-        std::cerr << "Stage 01C self-test walk animation must contain eight labeled poses\n";
+        std::cerr << "Stage 01D self-test walk animation must contain eight labeled poses\n";
+        return 1;
+    }
+    const std::array<const char*, 8> expectedWalkLabels{
+        "contact_a", "down_a", "passing_a", "up_a",
+        "contact_b", "down_b", "passing_b", "up_b"};
+    const std::array<double, 8> expectedRootOffsets{
+        0.0, 2.0, 1.0, -1.0, 0.0, 2.0, 1.0, -1.0};
+    const auto* walkStride = walk->find("stride_distance");
+    if (walkStride == nullptr || !walkStride->isNumber()
+        || walkStride->number() < 55.0 || walkStride->number() > 80.0) {
+        std::cerr << "Stage 01D self-test walk stride must be tuned to 55..80 logical px\n";
         return 1;
     }
     for (std::size_t index = 0; index < walkKeyframes->array().size(); ++index) {
-        const auto* phase = walkKeyframes->array()[index].find("phase");
+        const auto& keyframe = walkKeyframes->array()[index];
+        const auto* label = keyframe.find("label");
+        const auto* phase = keyframe.find("phase");
+        const auto* rootOffset = keyframe.find("root_offset_px");
+        if (label == nullptr || !label->isString()
+            || label->string() != expectedWalkLabels[index]
+            || rootOffset == nullptr || !rootOffset->isArray()
+            || rootOffset->array().size() != 2U
+            || !rootOffset->array()[0].isNumber()
+            || !rootOffset->array()[1].isNumber()
+            || std::fabs(rootOffset->array()[0].number()) > 0.001
+            || std::fabs(rootOffset->array()[1].number() - expectedRootOffsets[index]) > 0.001) {
+            std::cerr << "Stage 01D self-test walk labels/root offsets are invalid\n";
+            return 1;
+        }
         if (phase == nullptr || !phase->isNumber()
             || phase->number() != static_cast<double>(index) / 8.0) {
-            std::cerr << "Stage 01C self-test walk phases are not 0..0.875\n";
+            std::cerr << "Stage 01D self-test walk phases are not 0..0.875\n";
             return 1;
         }
     }
@@ -226,7 +252,7 @@ int GameApp::runSelfTest() const {
         || idleDuration == nullptr || !idleDuration->isNumber() || idleDuration->number() <= 0.0
         || idleKeyframes == nullptr || !idleKeyframes->isArray()
         || idleKeyframes->array().size() < 2U) {
-        std::cerr << "Stage 01C self-test idle animation is incomplete\n";
+        std::cerr << "Stage 01D self-test idle animation is incomplete\n";
         return 1;
     }
 
@@ -234,11 +260,11 @@ int GameApp::runSelfTest() const {
     engine::RigAnimation idleAnimation;
     if (!walkAnimation.load(rigDirectory / "Logen_walk_v3.json", error)
         || !idleAnimation.load(rigDirectory / "Logen_idle_v3.json", error)) {
-        std::cerr << "Stage 01C self-test animation load failed: " << error << "\n";
+        std::cerr << "Stage 01D self-test animation load failed: " << error << "\n";
         return 1;
     }
 
-    std::cout << "XYZ Game Stage 01C self-test passed.\n";
+    std::cout << "XYZ Game Stage 01D self-test passed.\n";
     return 0;
 }
 

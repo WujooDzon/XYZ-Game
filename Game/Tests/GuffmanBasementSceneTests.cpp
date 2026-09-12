@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 #include <string>
 
@@ -38,6 +39,7 @@ int main() {
         check(scene.rigHeight() >= 182.0F && scene.rigHeight() <= 194.0F,
               "rig character height is in the intended range");
         check(scene.walkPhase() == 0.0F, "walk starts at neutral phase");
+        check(scene.footPlantCorrectionEnabled(), "foot planting defaults to enabled");
         renderer.clear();
         scene.render(renderer);
         renderer.present();
@@ -137,6 +139,31 @@ int main() {
         input.handleEvent(pauseToggle);
         scene.update(0.0F, input, renderer);
         check(scene.rigPaused(), "F5 pauses rig animation");
+
+        input.beginFrame();
+        SDL_Event footPlantToggle = debugToggle;
+        footPlantToggle.key.scancode = SDL_SCANCODE_F6;
+        footPlantToggle.key.repeat = false;
+        input.handleEvent(footPlantToggle);
+        scene.update(0.0F, input, renderer);
+        check(!scene.footPlantCorrectionEnabled(), "F6 disables foot planting");
+        check(scene.visualRootCorrectionX() == 0.0F, "disabled foot planting clears correction");
+
+        input.beginFrame();
+        input.handleEvent(footPlantToggle);
+        scene.update(0.0F, input, renderer);
+        check(scene.footPlantCorrectionEnabled(), "F6 re-enables foot planting");
+
+        input.beginFrame();
+        SDL_Event rigReviewCapture = debugToggle;
+        rigReviewCapture.key.scancode = SDL_SCANCODE_F7;
+        rigReviewCapture.key.repeat = false;
+        input.handleEvent(rigReviewCapture);
+        scene.update(0.0F, input, renderer);
+        check(scene.rigReviewError().empty(), "F7 exports the V3 rig review without errors");
+        check(std::filesystem::is_regular_file(
+                  "Build/RigReview/Logen_walk_contact_sheet.png"),
+              "F7 writes the walk contact sheet");
 
         input.beginFrame();
         SDL_Event stepPose = debugToggle;

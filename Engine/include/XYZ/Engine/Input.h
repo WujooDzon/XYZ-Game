@@ -38,6 +38,8 @@ public:
     [[nodiscard]] bool rigReloadPressed() const noexcept;
     [[nodiscard]] bool masterReferenceTogglePressed() const noexcept;
     [[nodiscard]] bool rigPauseTogglePressed() const noexcept;
+    [[nodiscard]] bool footPlantTogglePressed() const noexcept;
+    [[nodiscard]] bool rigReviewCapturePressed() const noexcept;
     [[nodiscard]] const RigCalibrationInput& rigCalibration() const noexcept;
     [[nodiscard]] bool quitRequested() const noexcept;
 
@@ -50,6 +52,8 @@ private:
     bool rigReloadPressed_ = false;
     bool masterReferenceTogglePressed_ = false;
     bool rigPauseTogglePressed_ = false;
+    bool footPlantTogglePressed_ = false;
+    bool rigReviewCapturePressed_ = false;
     RigCalibrationInput rigCalibration_{};
     bool quitRequested_ = false;
 };

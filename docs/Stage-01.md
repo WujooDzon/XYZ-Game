@@ -1,6 +1,6 @@
 # XYZ — Stage 01 First Playable Scene
 
-Stage 01 replaces the Stage 00 placeholder with the first playable C++ target. It contains one fixed-camera SDL3 scene: Guffman’s basement with Logen standing near the bed. The active character renderer is extended by [Stage 01B — Logen Cutout Rig](Stage-01B.md) and calibrated in [Stage 01C — Logen Rig Calibration](Stage-01C.md).
+Stage 01 replaces the Stage 00 placeholder with the first playable C++ target. It contains one fixed-camera SDL3 scene: Guffman’s basement with Logen standing near the bed. The active character renderer is extended by [Stage 01B — Logen Cutout Rig](Stage-01B.md), calibrated in [Stage 01C — Logen Rig Calibration](Stage-01C.md), and biomechanically corrected in [Stage 01D — Logen Walk Biomechanics](Stage-01D.md).
 
 ## Controls
 
@@ -15,7 +15,7 @@ Clicks are accepted in the logical floor band `y = 385...540`. The player moves 
 - Logical canvas: `960×540`.
 - Window presentation: 16:9, resizable, integer logical scaling with letterboxing as needed.
 - Texture filtering: nearest-neighbor.
-- Logen’s calibrated Stage 01C rig target height is `188` logical pixels and is assembled from the supplied cutout parts.
+- Logen’s calibrated Stage 01D rig target height is `188` logical pixels and is assembled from the supplied cutout parts.
 - Walk phase is driven by absolute player displacement with a configured `72 px` stride.
 - Left-facing visuals use horizontal mirror for this prototype; the source PNGs are unchanged.
 
@@ -27,13 +27,13 @@ Install the SDL image loader once:
 brew install sdl3 sdl3_image
 ```
 
-Run the full Stage 01C acceptance check from the repository root:
+Run the full Stage 01D acceptance check from the repository root:
 
 ```bash
 ./Tools/verify-stage01c.sh
 ```
 
-The test suite covers animation timing, keyboard/mouse event mapping, bounded eased target movement, rig normalization, foot planting, calibration controls, and a hidden-window scene integration test that loads the real basement and Logen rig PNGs. `XYZGame --self-test` verifies the Stage 01C asset/configuration set in both Debug and Release.
+The test suite covers animation timing, keyboard/mouse event mapping, bounded eased target movement, rig normalization, logical root offsets, Near/Far foot planting, calibration controls, walk biomechanics, and a hidden-window scene/exporter integration test that loads the real basement and Logen rig PNGs. `XYZGame --self-test` verifies the Stage 01D asset/configuration set in both Debug and Release.
 
 ## Launcher workflow
 

@@ -7,19 +7,26 @@ namespace xyz::game {
 namespace {
 
 constexpr float kTransferSeconds = 0.08F;
-constexpr float kMaximumCorrection = 10.0F;
+constexpr float kMaximumCorrection = 12.0F;
 
 FootPlantController::SupportFoot supportForPhase(float phase) noexcept {
-    return phase < 0.5F
-        ? FootPlantController::SupportFoot::Left
-        : FootPlantController::SupportFoot::Right;
+    if (phase < 0.36F) {
+        return FootPlantController::SupportFoot::Far;
+    }
+    if (phase < 0.50F) {
+        return FootPlantController::SupportFoot::None;
+    }
+    if (phase < 0.86F) {
+        return FootPlantController::SupportFoot::Near;
+    }
+    return FootPlantController::SupportFoot::None;
 }
 
 }
 
 FootPlantController::State FootPlantController::update(
-    float leftFootX,
-    float rightFootX,
+    float nearFootX,
+    float farFootX,
     float walkPhase,
     bool walking,
     float deltaSeconds) noexcept {
@@ -28,42 +35,63 @@ FootPlantController::State FootPlantController::update(
         return state();
     }
 
-    const float normalizedPhase = std::fmod(walkPhase, 1.0F) < 0.0F
-        ? std::fmod(walkPhase, 1.0F) + 1.0F
-        : std::fmod(walkPhase, 1.0F);
+    float normalizedPhase = std::fmod(walkPhase, 1.0F);
+    if (normalizedPhase < 0.0F) {
+        normalizedPhase += 1.0F;
+    }
+    nearFootWorldX_ = nearFootX;
+    farFootWorldX_ = farFootX;
     const SupportFoot desiredSupport = supportForPhase(normalizedPhase);
-    const float supportFootX = desiredSupport == SupportFoot::Left ? leftFootX : rightFootX;
 
     if (support_ != desiredSupport) {
-        const float currentVisualFootX = support_ == SupportFoot::Left
-            ? leftFootX + rootCorrectionX_
-            : support_ == SupportFoot::Right
-                ? rightFootX + rootCorrectionX_
-                : supportFootX;
-        plantedWorldX_ = currentVisualFootX;
         support_ = desiredSupport;
+        if (support_ == SupportFoot::None) {
+            plantedWorldX_ = 0.0F;
+            desiredCorrectionX_ = 0.0F;
+        } else {
+            const float newSupportFootX = support_ == SupportFoot::Near
+                ? nearFootWorldX_
+                : farFootWorldX_;
+            plantedWorldX_ = newSupportFootX + rootCorrectionX_;
+        }
     }
 
-    const float desiredCorrection = std::clamp(
-        plantedWorldX_ - supportFootX,
-        -kMaximumCorrection,
-        kMaximumCorrection);
+    if (support_ == SupportFoot::None) {
+        desiredCorrectionX_ = 0.0F;
+    } else {
+        const float supportFootX = support_ == SupportFoot::Near
+            ? nearFootWorldX_
+            : farFootWorldX_;
+        desiredCorrectionX_ = std::clamp(
+            plantedWorldX_ - supportFootX,
+            -kMaximumCorrection,
+            kMaximumCorrection);
+    }
     const float safeDelta = std::max(0.0F, deltaSeconds);
     rootCorrectionX_ = approach(
         rootCorrectionX_,
-        desiredCorrection,
+        desiredCorrectionX_,
         kMaximumCorrection * safeDelta / kTransferSeconds);
     return state();
 }
 
 void FootPlantController::reset() noexcept {
     support_ = SupportFoot::None;
+    nearFootWorldX_ = 0.0F;
+    farFootWorldX_ = 0.0F;
     plantedWorldX_ = 0.0F;
+    desiredCorrectionX_ = 0.0F;
     rootCorrectionX_ = 0.0F;
 }
 
 FootPlantController::State FootPlantController::state() const noexcept {
-    return {support_, rootCorrectionX_};
+    return {
+        support_,
+        nearFootWorldX_,
+        farFootWorldX_,
+        plantedWorldX_,
+        desiredCorrectionX_,
+        rootCorrectionX_};
 }
 
 float FootPlantController::approach(float current, float target, float maxDelta) noexcept {

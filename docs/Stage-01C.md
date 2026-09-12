@@ -2,6 +2,8 @@
 
 Stage 01C is the rig quality pass on top of the Stage 01B hierarchical cutout. The active Logen composition uses one source-rig coordinate space, target-height normalization to 188 logical pixels, a fixed `root_to_ground` anchor, and a render-only foot-plant correction.
 
+The follow-up [Stage 01D — Logen Walk Biomechanics](Stage-01D.md) keeps this infrastructure and corrects the V3 walk poses, Near/Far support transfer, hip spacing, and logical body-weight offsets.
+
 The runtime now provides:
 
 - eight labeled contact/down/passing/up walk poses with phase driven by travelled distance;

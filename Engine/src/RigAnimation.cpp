@@ -94,8 +94,21 @@ RigPoseTransform interpolate(
                 + (end.scaleMultiplier.y - start.scaleMultiplier.y) * amount}};
 }
 
+SDL_FPoint interpolatePoint(
+    const SDL_FPoint& start,
+    const SDL_FPoint& end,
+    float amount) {
+    return {
+        start.x + (end.x - start.x) * amount,
+        start.y + (end.y - start.y) * amount};
+}
+
 RigPose blendPoses(const RigPose& start, const RigPose& end, float amount) {
     RigPose result;
+    result.rootOffsetLogical = interpolatePoint(
+        start.rootOffsetLogical,
+        end.rootOffsetLogical,
+        amount);
     std::set<std::string> nodeIds;
     for (const auto& [nodeId, ignored] : start.nodes) {
         static_cast<void>(ignored);
@@ -206,6 +219,17 @@ bool RigAnimation::load(const std::filesystem::path& path, std::string& error) {
             return false;
         }
 
+        if (const JsonValue* rootOffsetValue = keyframeValue.find("root_offset_px");
+            rootOffsetValue != nullptr
+            && !readPoint(
+                keyframeValue,
+                "root_offset_px",
+                keyframeContext,
+                keyframe.pose.rootOffsetLogical,
+                error)) {
+            return false;
+        }
+
         for (const auto& [nodeId, nodeValue] : nodeValues->object()) {
             const std::string nodeContext = keyframeContext + " node '" + nodeId + "'";
             if (!nodeValue.isObject()) {
@@ -288,6 +312,11 @@ RigPose RigAnimation::sample(float normalizedPhase) const {
     }
     const float span = std::max(0.000001F, endPhase - startPhase);
     const float amount = std::clamp((phase - startPhase) / span, 0.0F, 1.0F);
+
+    result.rootOffsetLogical = interpolatePoint(
+        start->pose.rootOffsetLogical,
+        end->pose.rootOffsetLogical,
+        amount);
 
     std::set<std::string> nodeIds;
     for (const auto& [nodeId, ignored] : start->pose.nodes) {

@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 ACCEPTANCE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/xyz-stage01.XXXXXX")"
 trap 'rm -rf "$ACCEPTANCE_DIR"' EXIT
 
-printf '%s\n' "== Stage 01C calibrated rig assets =="
+printf '%s\n' "== Stage 01D calibrated rig assets =="
 CHARACTER_DIR="$ROOT_DIR/Assets/Characters/Logen"
 RIG_DIR="$CHARACTER_DIR/RigV3"
 test -f "$CHARACTER_DIR/Logen_Master_Right_v1.png"
@@ -58,8 +58,8 @@ for CONFIGURATION in Debug Release; do
 
     printf '%s\n' "== $CONFIGURATION asset self-test =="
     SELF_TEST_OUTPUT="$(XYZ_PROJECT_ROOT="$ROOT_DIR" "$BUILD_DIR/Game/XYZGame" --self-test)"
-    grep -Fq "XYZ Game Stage 01C self-test passed." <<<"$SELF_TEST_OUTPUT"
+    grep -Fq "XYZ Game Stage 01D self-test passed." <<<"$SELF_TEST_OUTPUT"
     printf '%s\n' "$SELF_TEST_OUTPUT"
 done
 
-printf '%s\n' "Stage 01C acceptance passed."
+printf '%s\n' "Stage 01D acceptance passed."

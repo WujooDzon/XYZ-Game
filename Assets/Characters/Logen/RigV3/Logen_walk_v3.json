@@ -1,143 +1,151 @@
 {
   "name": "walk",
   "loop": true,
-  "stride_distance": 72.0,
+  "stride_distance": 68.0,
   "duration_seconds": 1.0,
   "keyframes": [
     {
       "label": "contact_a",
       "phase": 0.0,
+      "root_offset_px": [0, 0],
       "nodes": {
         "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
-        "left_arm": {"position": [0, 0], "rotation": -1, "scale": [1, 1]},
+        "left_arm": {"position": [0, 0], "rotation": -3, "scale": [1, 1]},
         "cloak_tail": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "cloak_front": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
-        "far_thigh": {"position": [0, 0], "rotation": -16, "scale": [1, 1]},
-        "far_shin": {"position": [0, 0], "rotation": 28, "scale": [1, 1]},
-        "far_boot": {"position": [0, 0], "rotation": -8, "scale": [1, 1]},
-        "near_thigh": {"position": [0, 0], "rotation": 3, "scale": [1, 1]},
-        "near_shin": {"position": [0, 0], "rotation": -3, "scale": [1, 1]},
-        "near_boot": {"position": [0, 0], "rotation": 0, "scale": [1, 1]}
+        "far_thigh": {"position": [0, 0], "rotation": -22, "scale": [1, 1]},
+        "far_shin": {"position": [0, 0], "rotation": 10, "scale": [1, 1]},
+        "far_boot": {"position": [0, 0], "rotation": 3, "scale": [1, 1]},
+        "near_thigh": {"position": [0, 0], "rotation": 18, "scale": [1, 1]},
+        "near_shin": {"position": [0, 0], "rotation": 8, "scale": [1, 1]},
+        "near_boot": {"position": [0, 0], "rotation": -12, "scale": [1, 1]}
       }
     },
     {
       "label": "down_a",
       "phase": 0.125,
+      "root_offset_px": [0, 2],
       "nodes": {
-        "pelvis": {"position": [0, 3], "rotation": 0, "scale": [1, 1]},
-        "body_shell": {"position": [0, 0], "rotation": 0.6, "scale": [1, 1]},
+        "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "left_arm": {"position": [0, 0], "rotation": -2, "scale": [1, 1]},
-        "cloak_tail": {"position": [0, 1], "rotation": 0.5, "scale": [1, 1]},
-        "cloak_front": {"position": [0, 1], "rotation": 0.4, "scale": [1, 1]},
-        "far_thigh": {"position": [0, 0], "rotation": -20, "scale": [1, 1]},
-        "far_shin": {"position": [0, 0], "rotation": 35, "scale": [1, 1]},
-        "far_boot": {"position": [0, 0], "rotation": -10, "scale": [1, 1]},
-        "near_thigh": {"position": [0, 0], "rotation": 8, "scale": [1, 1]},
-        "near_shin": {"position": [0, 0], "rotation": -10, "scale": [1, 1]},
-        "near_boot": {"position": [0, 0], "rotation": 1, "scale": [1, 1]}
+        "cloak_tail": {"position": [0, 0], "rotation": 0.25, "scale": [1, 1]},
+        "cloak_front": {"position": [0, 0], "rotation": 0.2, "scale": [1, 1]},
+        "far_thigh": {"position": [0, 0], "rotation": -14, "scale": [1, 1]},
+        "far_shin": {"position": [0, 0], "rotation": 20, "scale": [1, 1]},
+        "far_boot": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "near_thigh": {"position": [0, 0], "rotation": 20, "scale": [1, 1]},
+        "near_shin": {"position": [0, 0], "rotation": 22, "scale": [1, 1]},
+        "near_boot": {"position": [0, 0], "rotation": -15, "scale": [1, 1]}
       }
     },
     {
       "label": "passing_a",
       "phase": 0.25,
+      "root_offset_px": [0, 1],
       "nodes": {
-        "pelvis": {"position": [0, 1], "rotation": 0, "scale": [1, 1]},
-        "body_shell": {"position": [0, 0], "rotation": 1.0, "scale": [1, 1]},
-        "left_arm": {"position": [0, 0], "rotation": 3, "scale": [1, 1]},
-        "cloak_tail": {"position": [0, 0], "rotation": 1.0, "scale": [1, 1]},
-        "cloak_front": {"position": [0, 0], "rotation": 0.8, "scale": [1, 1]},
-        "far_thigh": {"position": [0, 0], "rotation": 22, "scale": [1, 1]},
-        "far_shin": {"position": [0, 0], "rotation": -30, "scale": [1, 1]},
-        "far_boot": {"position": [0, 0], "rotation": 5, "scale": [1, 1]},
-        "near_thigh": {"position": [0, 0], "rotation": 12, "scale": [1, 1]},
-        "near_shin": {"position": [0, 0], "rotation": -18, "scale": [1, 1]},
-        "near_boot": {"position": [0, 0], "rotation": 2, "scale": [1, 1]}
+        "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "left_arm": {"position": [0, 0], "rotation": 2, "scale": [1, 1]},
+        "cloak_tail": {"position": [0, 0], "rotation": 0.4, "scale": [1, 1]},
+        "cloak_front": {"position": [0, 0], "rotation": 0.3, "scale": [1, 1]},
+        "far_thigh": {"position": [0, 0], "rotation": 2, "scale": [1, 1]},
+        "far_shin": {"position": [0, 0], "rotation": 8, "scale": [1, 1]},
+        "far_boot": {"position": [0, 0], "rotation": -5, "scale": [1, 1]},
+        "near_thigh": {"position": [0, 0], "rotation": -10, "scale": [1, 1]},
+        "near_shin": {"position": [0, 0], "rotation": 48, "scale": [1, 1]},
+        "near_boot": {"position": [0, 0], "rotation": -12, "scale": [1, 1]}
       }
     },
     {
       "label": "up_a",
       "phase": 0.375,
+      "root_offset_px": [0, -1],
       "nodes": {
-        "pelvis": {"position": [0, -1], "rotation": 0, "scale": [1, 1]},
-        "body_shell": {"position": [0, 0], "rotation": -0.7, "scale": [1, 1]},
+        "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "left_arm": {"position": [0, 0], "rotation": 1, "scale": [1, 1]},
-        "cloak_tail": {"position": [0, 0], "rotation": -0.8, "scale": [1, 1]},
-        "cloak_front": {"position": [0, 0], "rotation": -0.6, "scale": [1, 1]},
-        "far_thigh": {"position": [0, 0], "rotation": 18, "scale": [1, 1]},
-        "far_shin": {"position": [0, 0], "rotation": -24, "scale": [1, 1]},
-        "far_boot": {"position": [0, 0], "rotation": 4, "scale": [1, 1]},
-        "near_thigh": {"position": [0, 0], "rotation": -4, "scale": [1, 1]},
-        "near_shin": {"position": [0, 0], "rotation": 12, "scale": [1, 1]},
-        "near_boot": {"position": [0, 0], "rotation": -2, "scale": [1, 1]}
+        "cloak_tail": {"position": [0, 0], "rotation": 0.5, "scale": [1, 1]},
+        "cloak_front": {"position": [0, 0], "rotation": 0.35, "scale": [1, 1]},
+        "far_thigh": {"position": [0, 0], "rotation": 14, "scale": [1, 1]},
+        "far_shin": {"position": [0, 0], "rotation": 4, "scale": [1, 1]},
+        "far_boot": {"position": [0, 0], "rotation": -10, "scale": [1, 1]},
+        "near_thigh": {"position": [0, 0], "rotation": -22, "scale": [1, 1]},
+        "near_shin": {"position": [0, 0], "rotation": 24, "scale": [1, 1]},
+        "near_boot": {"position": [0, 0], "rotation": -6, "scale": [1, 1]}
       }
     },
     {
       "label": "contact_b",
       "phase": 0.5,
+      "root_offset_px": [0, 0],
       "nodes": {
         "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
-        "left_arm": {"position": [0, 0], "rotation": 1, "scale": [1, 1]},
+        "left_arm": {"position": [0, 0], "rotation": 3, "scale": [1, 1]},
         "cloak_tail": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "cloak_front": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
-        "far_thigh": {"position": [0, 0], "rotation": 3, "scale": [1, 1]},
-        "far_shin": {"position": [0, 0], "rotation": -3, "scale": [1, 1]},
-        "far_boot": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
-        "near_thigh": {"position": [0, 0], "rotation": -16, "scale": [1, 1]},
-        "near_shin": {"position": [0, 0], "rotation": 28, "scale": [1, 1]},
-        "near_boot": {"position": [0, 0], "rotation": -8, "scale": [1, 1]}
+        "far_thigh": {"position": [0, 0], "rotation": 18, "scale": [1, 1]},
+        "far_shin": {"position": [0, 0], "rotation": 8, "scale": [1, 1]},
+        "far_boot": {"position": [0, 0], "rotation": -12, "scale": [1, 1]},
+        "near_thigh": {"position": [0, 0], "rotation": -22, "scale": [1, 1]},
+        "near_shin": {"position": [0, 0], "rotation": 10, "scale": [1, 1]},
+        "near_boot": {"position": [0, 0], "rotation": 3, "scale": [1, 1]}
       }
     },
     {
       "label": "down_b",
       "phase": 0.625,
+      "root_offset_px": [0, 2],
       "nodes": {
-        "pelvis": {"position": [0, 3], "rotation": 0, "scale": [1, 1]},
-        "body_shell": {"position": [0, 0], "rotation": -0.6, "scale": [1, 1]},
+        "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "left_arm": {"position": [0, 0], "rotation": 2, "scale": [1, 1]},
-        "cloak_tail": {"position": [0, 1], "rotation": -0.5, "scale": [1, 1]},
-        "cloak_front": {"position": [0, 1], "rotation": -0.4, "scale": [1, 1]},
-        "far_thigh": {"position": [0, 0], "rotation": 8, "scale": [1, 1]},
-        "far_shin": {"position": [0, 0], "rotation": -10, "scale": [1, 1]},
-        "far_boot": {"position": [0, 0], "rotation": 1, "scale": [1, 1]},
-        "near_thigh": {"position": [0, 0], "rotation": -20, "scale": [1, 1]},
-        "near_shin": {"position": [0, 0], "rotation": 35, "scale": [1, 1]},
-        "near_boot": {"position": [0, 0], "rotation": -10, "scale": [1, 1]}
+        "cloak_tail": {"position": [0, 0], "rotation": -0.25, "scale": [1, 1]},
+        "cloak_front": {"position": [0, 0], "rotation": -0.2, "scale": [1, 1]},
+        "far_thigh": {"position": [0, 0], "rotation": 20, "scale": [1, 1]},
+        "far_shin": {"position": [0, 0], "rotation": 22, "scale": [1, 1]},
+        "far_boot": {"position": [0, 0], "rotation": -15, "scale": [1, 1]},
+        "near_thigh": {"position": [0, 0], "rotation": -14, "scale": [1, 1]},
+        "near_shin": {"position": [0, 0], "rotation": 20, "scale": [1, 1]},
+        "near_boot": {"position": [0, 0], "rotation": 0, "scale": [1, 1]}
       }
     },
     {
       "label": "passing_b",
       "phase": 0.75,
+      "root_offset_px": [0, 1],
       "nodes": {
-        "pelvis": {"position": [0, 1], "rotation": 0, "scale": [1, 1]},
-        "body_shell": {"position": [0, 0], "rotation": -1.0, "scale": [1, 1]},
-        "left_arm": {"position": [0, 0], "rotation": -3, "scale": [1, 1]},
-        "cloak_tail": {"position": [0, 0], "rotation": -1.0, "scale": [1, 1]},
-        "cloak_front": {"position": [0, 0], "rotation": -0.8, "scale": [1, 1]},
-        "far_thigh": {"position": [0, 0], "rotation": 12, "scale": [1, 1]},
-        "far_shin": {"position": [0, 0], "rotation": -18, "scale": [1, 1]},
-        "far_boot": {"position": [0, 0], "rotation": 2, "scale": [1, 1]},
-        "near_thigh": {"position": [0, 0], "rotation": 22, "scale": [1, 1]},
-        "near_shin": {"position": [0, 0], "rotation": -30, "scale": [1, 1]},
-        "near_boot": {"position": [0, 0], "rotation": 5, "scale": [1, 1]}
+        "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "left_arm": {"position": [0, 0], "rotation": -2, "scale": [1, 1]},
+        "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "cloak_tail": {"position": [0, 0], "rotation": -0.4, "scale": [1, 1]},
+        "cloak_front": {"position": [0, 0], "rotation": -0.3, "scale": [1, 1]},
+        "far_thigh": {"position": [0, 0], "rotation": -10, "scale": [1, 1]},
+        "far_shin": {"position": [0, 0], "rotation": 48, "scale": [1, 1]},
+        "far_boot": {"position": [0, 0], "rotation": -12, "scale": [1, 1]},
+        "near_thigh": {"position": [0, 0], "rotation": 2, "scale": [1, 1]},
+        "near_shin": {"position": [0, 0], "rotation": 8, "scale": [1, 1]},
+        "near_boot": {"position": [0, 0], "rotation": -5, "scale": [1, 1]}
       }
     },
     {
       "label": "up_b",
       "phase": 0.875,
+      "root_offset_px": [0, -1],
       "nodes": {
-        "pelvis": {"position": [0, -1], "rotation": 0, "scale": [1, 1]},
-        "body_shell": {"position": [0, 0], "rotation": 0.7, "scale": [1, 1]},
+        "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "left_arm": {"position": [0, 0], "rotation": -1, "scale": [1, 1]},
-        "cloak_tail": {"position": [0, 0], "rotation": 0.8, "scale": [1, 1]},
-        "cloak_front": {"position": [0, 0], "rotation": 0.6, "scale": [1, 1]},
-        "far_thigh": {"position": [0, 0], "rotation": -4, "scale": [1, 1]},
-        "far_shin": {"position": [0, 0], "rotation": 12, "scale": [1, 1]},
-        "far_boot": {"position": [0, 0], "rotation": -2, "scale": [1, 1]},
-        "near_thigh": {"position": [0, 0], "rotation": 18, "scale": [1, 1]},
-        "near_shin": {"position": [0, 0], "rotation": -24, "scale": [1, 1]},
-        "near_boot": {"position": [0, 0], "rotation": 4, "scale": [1, 1]}
+        "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
+        "cloak_tail": {"position": [0, 0], "rotation": -0.5, "scale": [1, 1]},
+        "cloak_front": {"position": [0, 0], "rotation": -0.35, "scale": [1, 1]},
+        "far_thigh": {"position": [0, 0], "rotation": -22, "scale": [1, 1]},
+        "far_shin": {"position": [0, 0], "rotation": 24, "scale": [1, 1]},
+        "far_boot": {"position": [0, 0], "rotation": -6, "scale": [1, 1]},
+        "near_thigh": {"position": [0, 0], "rotation": 14, "scale": [1, 1]},
+        "near_shin": {"position": [0, 0], "rotation": 4, "scale": [1, 1]},
+        "near_boot": {"position": [0, 0], "rotation": -10, "scale": [1, 1]}
       }
     }
   ]

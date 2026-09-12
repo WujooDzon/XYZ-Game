@@ -4,6 +4,7 @@ add_executable(XYZGame
     src/GuffmanBasementScene.cpp
     src/FootPlantController.cpp
     src/PlayerController.cpp
+    src/RigReviewExporter.cpp
 )
 
 target_include_directories(XYZGame PRIVATE include)
@@ -23,6 +24,7 @@ add_executable(XYZGuffmanBasementSceneTests
     src/FootPlantController.cpp
     src/GuffmanBasementScene.cpp
     src/PlayerController.cpp
+    src/RigReviewExporter.cpp
 )
 
 target_include_directories(XYZGuffmanBasementSceneTests PRIVATE include)
@@ -46,3 +48,13 @@ add_executable(XYZLogenRigV3AssetTests
 target_link_libraries(XYZLogenRigV3AssetTests PRIVATE XYZEngine)
 add_test(NAME XYZLogenRigV3AssetTests COMMAND XYZLogenRigV3AssetTests)
 set_tests_properties(XYZLogenRigV3AssetTests PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
+add_executable(XYZRigReviewExporterTests
+    Tests/RigReviewExporterTests.cpp
+    src/RigReviewExporter.cpp
+)
+
+target_include_directories(XYZRigReviewExporterTests PRIVATE include)
+target_link_libraries(XYZRigReviewExporterTests PRIVATE XYZEngine)
+add_test(NAME XYZRigReviewExporterTests COMMAND XYZRigReviewExporterTests)
+set_tests_properties(XYZRigReviewExporterTests PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

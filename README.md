@@ -2,7 +2,7 @@
 
 2D pixel-art narrative game prototype in C++ with a lightweight custom engine and a native macOS SwiftUI developer launcher.
 
-Current milestone: **Stage 01B — Logen cutout-rig animation**.
+Current milestone: **Stage 01D — Logen walk biomechanics**.
 
 ## Repository layout
 

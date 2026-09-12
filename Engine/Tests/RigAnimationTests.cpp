@@ -100,6 +100,29 @@ int main() {
     animator.setAnimation(&walk, 0.0F, true);
     check(std::fabs(animator.phase() - savedWalkPhase) < 0.001F,
           "walk phase is preserved across idle transition");
+
+    const auto logicalOffsetPath = writeFile(
+        testDirectory,
+        "logical-offset.json",
+        R"({
+  "name": "walk",
+  "loop": true,
+  "stride_distance": 64.0,
+  "duration_seconds": 1.0,
+  "keyframes": [
+    {"phase":0.0,"root_offset_px":[0,2],"nodes":{}},
+    {"phase":0.5,"root_offset_px":[0,-1],"nodes":{}}
+  ]
+})");
+    xyz::engine::RigAnimation logicalOffset;
+    check(logicalOffset.load(logicalOffsetPath, error), error.c_str());
+    check(std::fabs(logicalOffset.sample(0.0F).rootOffsetLogical.y - 2.0F) < 0.001F,
+          "logical root offset is loaded at a keyframe");
+    check(std::fabs(logicalOffset.sample(0.25F).rootOffsetLogical.y - 0.5F) < 0.001F,
+          "logical root offset interpolates between keyframes");
+    check(std::fabs(logicalOffset.sample(0.5F).rootOffsetLogical.y + 1.0F) < 0.001F,
+          "logical root offset samples the next keyframe");
+
     animator.setPaused(true);
     const float pausedPhase = animator.phase();
     animator.advanceByDistance(12.0F);

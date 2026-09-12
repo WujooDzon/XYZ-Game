@@ -8,6 +8,8 @@ void Input::beginFrame() noexcept {
     rigReloadPressed_ = false;
     masterReferenceTogglePressed_ = false;
     rigPauseTogglePressed_ = false;
+    footPlantTogglePressed_ = false;
+    rigReviewCapturePressed_ = false;
     rigCalibration_ = {};
 }
 
@@ -51,6 +53,16 @@ void Input::handleEvent(const SDL_Event& event) noexcept {
                 case SDL_SCANCODE_F5:
                     if (pressed && !event.key.repeat) {
                         rigPauseTogglePressed_ = true;
+                    }
+                    break;
+                case SDL_SCANCODE_F6:
+                    if (pressed && !event.key.repeat) {
+                        footPlantTogglePressed_ = true;
+                    }
+                    break;
+                case SDL_SCANCODE_F7:
+                    if (pressed && !event.key.repeat) {
+                        rigReviewCapturePressed_ = true;
                     }
                     break;
                 case SDL_SCANCODE_TAB:
@@ -188,6 +200,14 @@ bool Input::masterReferenceTogglePressed() const noexcept {
 
 bool Input::rigPauseTogglePressed() const noexcept {
     return rigPauseTogglePressed_;
+}
+
+bool Input::footPlantTogglePressed() const noexcept {
+    return footPlantTogglePressed_;
+}
+
+bool Input::rigReviewCapturePressed() const noexcept {
+    return rigReviewCapturePressed_;
 }
 
 const RigCalibrationInput& Input::rigCalibration() const noexcept {

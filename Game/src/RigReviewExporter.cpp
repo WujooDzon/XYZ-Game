@@ -135,32 +135,61 @@ bool saveTargetPose(
     std::string& error,
     std::string_view isolatedNode = {}) {
     SDL_Renderer* nativeRenderer = renderer.native();
-    SDL_Texture* target = SDL_CreateTexture(
+    SDL_Texture* logicalTarget = SDL_CreateTexture(
         nativeRenderer,
         SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_TARGET,
-        engine::Renderer2D::LogicalWidth * scale,
-        engine::Renderer2D::LogicalHeight * scale);
-    if (target == nullptr) {
+        engine::Renderer2D::LogicalWidth,
+        engine::Renderer2D::LogicalHeight);
+    if (logicalTarget == nullptr) {
         error = "could not create audit render target: " + std::string(SDL_GetError());
         return false;
     }
-    SDL_SetTextureScaleMode(target, SDL_SCALEMODE_NEAREST);
+    SDL_SetTextureScaleMode(logicalTarget, SDL_SCALEMODE_NEAREST);
     SDL_Texture* previousTarget = SDL_GetRenderTarget(nativeRenderer);
-    bool success = SDL_SetRenderTarget(nativeRenderer, target)
+    float previousScaleX = 1.0F;
+    float previousScaleY = 1.0F;
+    const bool capturedScale = SDL_GetRenderScale(
+        nativeRenderer, &previousScaleX, &previousScaleY);
+    bool success = capturedScale
+        && SDL_SetRenderTarget(nativeRenderer, logicalTarget)
+        && SDL_SetRenderScale(nativeRenderer, 1.0F, 1.0F)
         && drawAuditPose(renderer, rig, pose, background, mirrored, isolatedNode);
     if (!success) {
         error = "could not render audit pose '" + path.string() + "': "
             + std::string(SDL_GetError());
-    } else {
+    } else if (scale == 1) {
         success = saveCurrentRender(nativeRenderer, path, error);
+    } else {
+        SDL_Texture* presentationTarget = SDL_CreateTexture(
+            nativeRenderer,
+            SDL_PIXELFORMAT_RGBA8888,
+            SDL_TEXTUREACCESS_TARGET,
+            engine::Renderer2D::LogicalWidth * scale,
+            engine::Renderer2D::LogicalHeight * scale);
+        if (presentationTarget == nullptr
+            || !SDL_SetRenderTarget(nativeRenderer, presentationTarget)
+            || !clearTo(nativeRenderer, background)
+            || !SDL_RenderTexture(nativeRenderer, logicalTarget, nullptr, nullptr)) {
+            error = "could not present audit target at integer scale: "
+                + std::string(SDL_GetError());
+            success = false;
+        } else {
+            success = saveCurrentRender(nativeRenderer, path, error);
+        }
+        SDL_DestroyTexture(presentationTarget);
+    }
+    if (!SDL_SetRenderScale(nativeRenderer, previousScaleX, previousScaleY) && success) {
+        error = "could not restore renderer scale after audit capture: "
+            + std::string(SDL_GetError());
+        success = false;
     }
     if (!SDL_SetRenderTarget(nativeRenderer, previousTarget) && success) {
         error = "could not restore renderer target after audit capture: "
             + std::string(SDL_GetError());
         success = false;
     }
-    SDL_DestroyTexture(target);
+    SDL_DestroyTexture(logicalTarget);
     return success;
 }
 

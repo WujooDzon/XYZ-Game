@@ -27,10 +27,15 @@ int main() {
     const std::filesystem::path root = std::filesystem::current_path();
     const std::filesystem::path rigDirectory =
         root / "Assets" / "Characters" / "Logen" / "RigV3";
-    const std::filesystem::path outputDirectory =
-        std::filesystem::temp_directory_path() / "xyz-stage01d-rig-review-test";
+    const char* configuredOutput = std::getenv("XYZ_LOGEN_AUDIT_OUTPUT");
+    const bool preserveOutput = configuredOutput != nullptr && configuredOutput[0] != '\0';
+    const std::filesystem::path outputDirectory = preserveOutput
+        ? std::filesystem::path(configuredOutput)
+        : std::filesystem::temp_directory_path() / "xyz-stage01d-rig-review-test";
     std::error_code filesystemError;
-    std::filesystem::remove_all(outputDirectory, filesystemError);
+    if (!preserveOutput) {
+        std::filesystem::remove_all(outputDirectory, filesystemError);
+    }
 
     check(SDL_Init(SDL_INIT_VIDEO), "SDL video initializes");
     SDL_Window* window = SDL_CreateWindow(
@@ -62,6 +67,16 @@ int main() {
                   error),
               error);
 
+        const std::filesystem::path auditDirectory = outputDirectory / "audit";
+        check(exporter.exportAuditEvidence(
+                  renderer,
+                  rig,
+                  idleAnimation,
+                  walkAnimation,
+                  auditDirectory,
+                  error),
+              error);
+
         const std::array<std::string, 10> expectedFiles{
             "00_idle.png",
             "01_contact_a.png",
@@ -83,10 +98,42 @@ int main() {
                   "export is exactly 960x540: " + filename);
             SDL_DestroySurface(image);
         }
+
+
+        const std::array<std::string, 14> expectedAuditPngs{
+            "runtime/direct_contact_a.png",
+            "runtime/target_contact_a.png",
+            "runtime/target_contact_a_2x.png",
+            "runtime/motion_00.png",
+            "runtime/motion_02.png",
+            "runtime/motion_04.png",
+            "runtime/motion_06.png",
+            "artifacts/contact_a_dark.png",
+            "artifacts/contact_a_neutral.png",
+            "artifacts/contact_a_contrast.png",
+            "artifacts/contact_a_zero_rotation.png",
+            "geometry/contact_a_right.png",
+            "geometry/contact_a_left.png",
+            "proof/Logen_contact_a_raw.png"};
+        for (const std::string& relativePath : expectedAuditPngs) {
+            const std::filesystem::path path = auditDirectory / relativePath;
+            check(std::filesystem::is_regular_file(path), "audit export exists: " + relativePath);
+            SDL_Surface* image = IMG_Load(path.string().c_str());
+            check(image != nullptr, "audit export is a readable PNG: " + relativePath);
+            const bool isTwoX = relativePath == "runtime/target_contact_a_2x.png";
+            check(image->w == xyz::engine::Renderer2D::LogicalWidth * (isTwoX ? 2 : 1)
+                      && image->h == xyz::engine::Renderer2D::LogicalHeight * (isTwoX ? 2 : 1),
+                  "audit export has expected dimensions: " + relativePath);
+            SDL_DestroySurface(image);
+        }
+        check(std::filesystem::is_regular_file(auditDirectory / "runtime_metadata.json"),
+              "runtime metadata is exported");
     }
 
     SDL_DestroyWindow(window);
     SDL_Quit();
-    std::filesystem::remove_all(outputDirectory, filesystemError);
+    if (!preserveOutput) {
+        std::filesystem::remove_all(outputDirectory, filesystemError);
+    }
     std::cout << "RigReviewExporter tests passed.\n";
 }

@@ -98,6 +98,22 @@ AlphaBounds alphaBounds(SDL_Surface* source) {
     return bounds;
 }
 
+Uint8 alphaAt(SDL_Surface* source, int x, int y) {
+    SDL_Surface* converted = SDL_ConvertSurface(source, SDL_PIXELFORMAT_RGBA32);
+    check(converted != nullptr, "surface converts to RGBA32 for contact sampling");
+    check(x >= 0 && x < converted->w && y >= 0 && y < converted->h,
+          "contact sample lies inside the boot canvas");
+    const SDL_PixelFormatDetails* details = SDL_GetPixelFormatDetails(converted->format);
+    check(details != nullptr, "contact sample pixel format details are available");
+    const auto* pixels = static_cast<const Uint8*>(converted->pixels);
+    const auto* row = reinterpret_cast<const Uint32*>(
+        pixels + static_cast<std::size_t>(y) * static_cast<std::size_t>(converted->pitch));
+    Uint8 alpha = 0;
+    SDL_GetRGBA(row[x], details, nullptr, nullptr, nullptr, nullptr, &alpha);
+    SDL_DestroySurface(converted);
+    return alpha;
+}
+
 AlphaBounds renderedAlphaBounds(
     xyz::engine::Renderer2D& renderer,
     xyz::engine::Rig2D& rig,
@@ -179,6 +195,21 @@ void validateDefinition(const std::filesystem::path& path) {
             const JsonValue* contact = required(node, "ground_contact");
             check(contact->isArray() && contact->array().size() == 2U,
                   "each boot defines a ground contact");
+            const std::filesystem::path imagePath =
+                path.parent_path() / requiredString(node, "image");
+            SDL_Surface* boot = IMG_Load(imagePath.string().c_str());
+            check(boot != nullptr, "boot loads for contact anchor validation");
+            const int contactX = std::clamp(
+                static_cast<int>(std::floor(contact->array()[0].number() * boot->w)),
+                0,
+                boot->w - 1);
+            const int contactY = std::clamp(
+                static_cast<int>(std::floor(contact->array()[1].number() * boot->h)),
+                0,
+                boot->h - 1);
+            check(alphaAt(boot, contactX, contactY) >= 128,
+                  id + " ground_contact lands on the visible sole, not transparent padding");
+            SDL_DestroySurface(boot);
         }
         if (id == "pelvis") {
             continue;

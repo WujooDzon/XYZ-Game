@@ -198,6 +198,18 @@ int main() {
 
         const auto childIndex = rig.nodeIndex("child");
         check(childIndex.has_value(), "calibration can select a node");
+        check(rig.renderNode(
+                  renderer,
+                  {},
+                  "child",
+                  SDL_Color{255, 32, 32, SDL_ALPHA_OPAQUE}),
+              "one known rig part renders in isolation with modulation");
+        check(!rig.renderNode(
+                  renderer,
+                  {},
+                  "missing",
+                  SDL_Color{255, 32, 32, SDL_ALPHA_OPAQUE}),
+              "isolated render rejects an unknown rig part");
         check(rig.adjustNodePosition(*childIndex, {2.0F, -1.0F}),
               "calibration moves a node");
         check(rig.adjustNodeRotation(*childIndex, 3.0F),

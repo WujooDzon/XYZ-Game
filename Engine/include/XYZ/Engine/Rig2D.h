@@ -65,6 +65,11 @@ public:
     void setMirrored(bool mirrored) noexcept;
 
     [[nodiscard]] bool render(Renderer2D& renderer, const RigPose& pose) const;
+    [[nodiscard]] bool renderNode(
+        Renderer2D& renderer,
+        const RigPose& pose,
+        std::string_view nodeId,
+        SDL_Color modulation = {255, 255, 255, SDL_ALPHA_OPAQUE}) const;
     [[nodiscard]] bool debugRender(Renderer2D& renderer, const RigPose& pose) const;
     [[nodiscard]] std::vector<RigWorldNode> worldNodes(const RigPose& pose) const;
     [[nodiscard]] SDL_FRect bounds(const RigPose& pose) const;

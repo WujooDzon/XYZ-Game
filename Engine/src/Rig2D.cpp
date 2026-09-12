@@ -547,6 +547,51 @@ bool Rig2D::render(Renderer2D& renderer, const RigPose& pose) const {
     return success;
 }
 
+bool Rig2D::renderNode(
+    Renderer2D& renderer,
+    const RigPose& pose,
+    std::string_view nodeId,
+    SDL_Color modulation) const {
+    const auto selectedIndex = nodeIndex(nodeId);
+    if (!selectedIndex.has_value()) {
+        return false;
+    }
+
+    const std::vector<RigWorldNode> worlds = evaluateWorldNodes(pose);
+    const auto worldIterator = std::find_if(
+        worlds.begin(),
+        worlds.end(),
+        [selectedIndex](const RigWorldNode& world) {
+            return world.nodeIndex == static_cast<int>(*selectedIndex);
+        });
+    if (worldIterator == worlds.end()) {
+        return false;
+    }
+
+    const RigWorldNode& world = *worldIterator;
+    const RigNode& node = nodes_[world.nodeIndex];
+    if (!node.texture.loaded()) {
+        return false;
+    }
+    const float width = node.texture.width() * world.scale.x;
+    const float height = node.texture.height() * world.scale.y;
+    const SDL_FRect destination{
+        world.position.x - world.pivot.x * width,
+        world.position.y - world.pivot.y * height,
+        width,
+        height};
+    const SDL_FPoint center{
+        world.pivot.x * width,
+        world.pivot.y * height};
+    return renderer.drawTexture(
+        node.texture,
+        destination,
+        world.rotationDegrees,
+        center,
+        modulation,
+        mirrored_);
+}
+
 bool Rig2D::debugRender(Renderer2D& renderer, const RigPose& pose) const {
     const std::vector<RigWorldNode> worlds = evaluateWorldNodes(pose);
     bool success = true;

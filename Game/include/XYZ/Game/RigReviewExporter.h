@@ -20,6 +20,14 @@ public:
         const engine::RigAnimation& walkAnimation,
         const std::filesystem::path& outputDirectory,
         std::string& error) const;
+
+    bool exportAuditEvidence(
+        engine::Renderer2D& renderer,
+        engine::Rig2D& rig,
+        const engine::RigAnimation& idleAnimation,
+        const engine::RigAnimation& walkAnimation,
+        const std::filesystem::path& outputDirectory,
+        std::string& error) const;
 };
 
 }

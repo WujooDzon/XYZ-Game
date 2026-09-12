@@ -2,6 +2,7 @@
 
 #include <array>
 #include <filesystem>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -85,6 +86,82 @@ std::string contactSheetLabel(std::size_t index, std::string_view label) {
     std::ostringstream output;
     output << (index + 1U) << " " << label;
     return output.str();
+}
+
+bool createDirectories(const std::filesystem::path& path, std::string& error) {
+    std::error_code filesystemError;
+    std::filesystem::create_directories(path, filesystemError);
+    if (!filesystemError) {
+        return true;
+    }
+    error = "could not create audit directory '" + path.string()
+        + "': " + filesystemError.message();
+    return false;
+}
+
+bool clearTo(SDL_Renderer* renderer, SDL_Color color) {
+    return SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE)
+        && SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
+        && SDL_RenderClear(renderer);
+}
+
+bool drawAuditPose(
+    engine::Renderer2D& renderer,
+    engine::Rig2D& rig,
+    const engine::RigPose& pose,
+    SDL_Color background,
+    bool mirrored,
+    std::string_view isolatedNode = {}) {
+    if (!clearTo(renderer.native(), background)) {
+        return false;
+    }
+    rig.setRootPosition({kReviewCenterX, kReviewBaseline});
+    rig.setVisualRootCorrectionX(0.0F);
+    rig.setMirrored(mirrored);
+    if (!isolatedNode.empty()) {
+        return rig.renderNode(renderer, pose, isolatedNode);
+    }
+    return rig.render(renderer, pose);
+}
+
+bool saveTargetPose(
+    engine::Renderer2D& renderer,
+    engine::Rig2D& rig,
+    const engine::RigPose& pose,
+    const std::filesystem::path& path,
+    SDL_Color background,
+    bool mirrored,
+    int scale,
+    std::string& error,
+    std::string_view isolatedNode = {}) {
+    SDL_Renderer* nativeRenderer = renderer.native();
+    SDL_Texture* target = SDL_CreateTexture(
+        nativeRenderer,
+        SDL_PIXELFORMAT_RGBA8888,
+        SDL_TEXTUREACCESS_TARGET,
+        engine::Renderer2D::LogicalWidth * scale,
+        engine::Renderer2D::LogicalHeight * scale);
+    if (target == nullptr) {
+        error = "could not create audit render target: " + std::string(SDL_GetError());
+        return false;
+    }
+    SDL_SetTextureScaleMode(target, SDL_SCALEMODE_NEAREST);
+    SDL_Texture* previousTarget = SDL_GetRenderTarget(nativeRenderer);
+    bool success = SDL_SetRenderTarget(nativeRenderer, target)
+        && drawAuditPose(renderer, rig, pose, background, mirrored, isolatedNode);
+    if (!success) {
+        error = "could not render audit pose '" + path.string() + "': "
+            + std::string(SDL_GetError());
+    } else {
+        success = saveCurrentRender(nativeRenderer, path, error);
+    }
+    if (!SDL_SetRenderTarget(nativeRenderer, previousTarget) && success) {
+        error = "could not restore renderer target after audit capture: "
+            + std::string(SDL_GetError());
+        success = false;
+    }
+    SDL_DestroyTexture(target);
+    return success;
 }
 
 } // namespace
@@ -207,6 +284,140 @@ bool RigReviewExporter::exportWalkReview(
     }
 
     return finish(true);
+}
+
+bool RigReviewExporter::exportAuditEvidence(
+    engine::Renderer2D& renderer,
+    engine::Rig2D& rig,
+    const engine::RigAnimation& idleAnimation,
+    const engine::RigAnimation& walkAnimation,
+    const std::filesystem::path& outputDirectory,
+    std::string& error) const {
+    error.clear();
+    SDL_Renderer* nativeRenderer = renderer.native();
+    if (nativeRenderer == nullptr || !renderer.initialized()) {
+        error = "cannot export audit evidence without an initialized renderer";
+        return false;
+    }
+    if (idleAnimation.keyframeCount() == 0U || walkAnimation.keyframeCount() != 8U) {
+        error = "cannot export audit evidence without valid idle and eight-pose walk animations";
+        return false;
+    }
+
+    for (const char* directory : {"runtime", "artifacts", "geometry", "proof", "isolated"}) {
+        if (!createDirectories(outputDirectory / directory, error)) {
+            return false;
+        }
+    }
+
+    const engine::RigPose contactA = walkAnimation.sample(walkAnimation.keyframePhase(0));
+    const engine::RigPose passingA = walkAnimation.sample(walkAnimation.keyframePhase(2));
+    SDL_Texture* previousTarget = SDL_GetRenderTarget(nativeRenderer);
+    if (!SDL_SetRenderTarget(nativeRenderer, nullptr)
+        || !drawAuditPose(renderer, rig, contactA, {13, 11, 18, SDL_ALPHA_OPAQUE}, false)
+        || !saveCurrentRender(nativeRenderer, outputDirectory / "runtime/direct_contact_a.png", error)) {
+        if (error.empty()) {
+            error = "could not capture direct renderer output: " + std::string(SDL_GetError());
+        }
+        SDL_SetRenderTarget(nativeRenderer, previousTarget);
+        return false;
+    }
+    if (!SDL_SetRenderTarget(nativeRenderer, previousTarget)) {
+        error = "could not restore renderer target after direct capture: "
+            + std::string(SDL_GetError());
+        return false;
+    }
+
+    const auto save = [&](const engine::RigPose& pose,
+                          const std::filesystem::path& relativePath,
+                          SDL_Color background,
+                          bool mirrored = false,
+                          int scale = 1,
+                          std::string_view isolatedNode = {}) {
+        return saveTargetPose(
+            renderer,
+            rig,
+            pose,
+            outputDirectory / relativePath,
+            background,
+            mirrored,
+            scale,
+            error,
+            isolatedNode);
+    };
+
+    if (!save(contactA, "runtime/target_contact_a.png", {13, 11, 18, 255})
+        || !save(contactA, "runtime/target_contact_a_2x.png", {13, 11, 18, 255}, false, 2)
+        || !save(contactA, "artifacts/contact_a_dark.png", {13, 11, 18, 255})
+        || !save(contactA, "artifacts/contact_a_neutral.png", {96, 96, 96, 255})
+        || !save(contactA, "artifacts/contact_a_contrast.png", {229, 214, 171, 255})
+        || !save(contactA, "geometry/contact_a_right.png", {0, 0, 0, 0})
+        || !save(contactA, "geometry/contact_a_left.png", {0, 0, 0, 0}, true)
+        || !save(passingA, "geometry/passing_a_right.png", {0, 0, 0, 0})
+        || !save(passingA, "geometry/passing_a_left.png", {0, 0, 0, 0}, true)
+        || !save(contactA, "proof/Logen_contact_a_raw.png", {0, 0, 0, 0})
+        || !save(passingA, "proof/Logen_passing_a_raw.png", {0, 0, 0, 0})) {
+        return false;
+    }
+
+    engine::RigPose zeroRotation = contactA;
+    for (const engine::RigNode& node : rig.nodes()) {
+        zeroRotation.nodes[node.id].rotationDegrees = -node.baseRotationDegrees;
+    }
+    if (!save(zeroRotation, "artifacts/contact_a_zero_rotation.png", {13, 11, 18, 255})) {
+        return false;
+    }
+
+    for (std::size_t index = 0; index < walkAnimation.keyframeCount(); ++index) {
+        std::ostringstream filename;
+        filename << "runtime/motion_" << (index < 10U ? "0" : "") << index << ".png";
+        if (!save(
+                walkAnimation.sample(walkAnimation.keyframePhase(index)),
+                filename.str(),
+                {13, 11, 18, 255})) {
+            return false;
+        }
+    }
+
+    for (const engine::RigNode& node : rig.nodes()) {
+        if (!node.texture.loaded()) {
+            continue;
+        }
+        if (!save(
+                contactA,
+                std::filesystem::path("isolated") / (node.id + ".png"),
+                {0, 0, 0, 0},
+                false,
+                1,
+                node.id)) {
+            return false;
+        }
+    }
+
+    int outputWidth = 0;
+    int outputHeight = 0;
+    SDL_GetCurrentRenderOutputSize(nativeRenderer, &outputWidth, &outputHeight);
+    const int version = SDL_GetVersion();
+    std::ofstream metadata(outputDirectory / "runtime_metadata.json");
+    if (!metadata) {
+        error = "could not create runtime metadata JSON";
+        return false;
+    }
+    metadata << "{\n"
+             << "  \"sdl_version\": \"" << SDL_VERSIONNUM_MAJOR(version) << "."
+             << SDL_VERSIONNUM_MINOR(version) << "." << SDL_VERSIONNUM_MICRO(version) << "\",\n"
+             << "  \"renderer\": \"" << SDL_GetRendererName(nativeRenderer) << "\",\n"
+             << "  \"output_size\": [" << outputWidth << ", " << outputHeight << "],\n"
+             << "  \"logical_size\": [960, 540],\n"
+             << "  \"target_format\": \"SDL_PIXELFORMAT_RGBA8888\",\n"
+             << "  \"target_scale_mode\": \"nearest\"\n"
+             << "}\n";
+    if (!metadata) {
+        error = "could not write runtime metadata JSON";
+        return false;
+    }
+    rig.setMirrored(false);
+    return true;
 }
 
 }

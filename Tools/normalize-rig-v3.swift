@@ -68,6 +68,19 @@ guard rendered else {
     fail("could not decode \(inputURL.path) into an RGBA buffer")
 }
 
+// CoreGraphics writes premultiplied RGB into this buffer. The normalizer later
+// hardens every retained alpha value to 255, so recover straight RGB first or
+// translucent source colors become permanently darkened.
+for pixelIndex in 0..<(width * height) {
+    let offset = pixelIndex * 4
+    let alpha = Int(pixels[offset + 3])
+    guard alpha > 0, alpha < 255 else { continue }
+    for channel in 0..<3 {
+        let premultiplied = Int(pixels[offset + channel])
+        pixels[offset + channel] = UInt8(min(255, (premultiplied * 255 + alpha / 2) / alpha))
+    }
+}
+
 @inline(__always)
 func pixelOffset(_ x: Int, _ y: Int) -> Int {
     (y * width + x) * 4

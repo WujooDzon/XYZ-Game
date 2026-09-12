@@ -40,6 +40,38 @@ float quantize(float value) {
     return std::round(value / kTranslationQuantum) * kTranslationQuantum;
 }
 
+SDL_FRect transformedBounds(
+    const RigNode& node,
+    const RigWorldNode& world,
+    const SDL_FRect& sourceBounds) {
+    if (!node.texture.loaded() || sourceBounds.w <= 0.0F || sourceBounds.h <= 0.0F) {
+        return {};
+    }
+    const float pivotX = world.pivot.x * node.texture.width();
+    const float pivotY = world.pivot.y * node.texture.height();
+    const float left = (sourceBounds.x - pivotX) * world.scale.x;
+    const float right = (sourceBounds.x + sourceBounds.w - pivotX) * world.scale.x;
+    const float top = (sourceBounds.y - pivotY) * world.scale.y;
+    const float bottom = (sourceBounds.y + sourceBounds.h - pivotY) * world.scale.y;
+    const SDL_FPoint corners[] = {
+        {left, top},
+        {right, top},
+        {left, bottom},
+        {right, bottom}};
+    float minimumX = std::numeric_limits<float>::max();
+    float minimumY = std::numeric_limits<float>::max();
+    float maximumX = std::numeric_limits<float>::lowest();
+    float maximumY = std::numeric_limits<float>::lowest();
+    for (const SDL_FPoint corner : corners) {
+        const SDL_FPoint rotatedCorner = add(world.position, rotate(corner, world.rotationDegrees));
+        minimumX = std::min(minimumX, rotatedCorner.x);
+        minimumY = std::min(minimumY, rotatedCorner.y);
+        maximumX = std::max(maximumX, rotatedCorner.x);
+        maximumY = std::max(maximumY, rotatedCorner.y);
+    }
+    return {minimumX, minimumY, maximumX - minimumX, maximumY - minimumY};
+}
+
 const JsonValue* requiredValue(
     const JsonValue& object,
     std::string_view key,
@@ -323,7 +355,7 @@ bool Rig2D::loadDefinition(
     settings_ = loadedSettings;
     definitionPath_ = definitionPath;
     effectiveScale_ = 1.0F;
-    neutralHeight_ = bounds({}).h;
+    neutralHeight_ = visibleBounds({}).h;
     if (!std::isfinite(neutralHeight_) || neutralHeight_ <= 0.0F) {
         nodes_ = std::move(previousNodes);
         rootIndex_ = previousRootIndex;
@@ -331,7 +363,7 @@ bool Rig2D::loadDefinition(
         definitionPath_ = previousDefinitionPath;
         neutralHeight_ = previousNeutralHeight;
         effectiveScale_ = previousEffectiveScale;
-        error = definitionPath.string() + " neutral rig has no textured height";
+        error = definitionPath.string() + " neutral rig has no visible alpha height";
         return false;
     }
 
@@ -394,6 +426,20 @@ std::vector<RigWorldNode> Rig2D::evaluateWorldNodes(const RigPose& pose) const {
             world.position.x = quantize(mirrorRootX - (world.position.x - mirrorRootX));
             world.rotationDegrees = -world.rotationDegrees;
             world.pivot.x = 1.0F - world.pivot.x;
+            const RigNode& node = nodes_[world.nodeIndex];
+            world.bounds = transformedBounds(
+                node,
+                world,
+                {0.0F, 0.0F, node.texture.width(), node.texture.height()});
+            if (const auto visible = node.texture.visibleBounds(); visible.has_value()) {
+                world.visibleBounds = transformedBounds(
+                    node,
+                    world,
+                    {static_cast<float>(visible->x),
+                     static_cast<float>(visible->y),
+                     static_cast<float>(visible->w),
+                     static_cast<float>(visible->h)});
+            }
         }
     }
     return output;
@@ -437,31 +483,19 @@ void Rig2D::evaluateNode(
     world.position.y = quantize(world.position.y);
 
     if (node.texture.loaded()) {
-        const float width = node.texture.width() * world.scale.x;
-        const float height = node.texture.height() * world.scale.y;
-        const float pivotX = world.pivot.x * width;
-        const float pivotY = world.pivot.y * height;
-        const SDL_FPoint corners[] = {
-            {-pivotX, -pivotY},
-            {width - pivotX, -pivotY},
-            {-pivotX, height - pivotY},
-            {width - pivotX, height - pivotY}};
-        float minimumX = std::numeric_limits<float>::max();
-        float minimumY = std::numeric_limits<float>::max();
-        float maximumX = std::numeric_limits<float>::lowest();
-        float maximumY = std::numeric_limits<float>::lowest();
-        for (const SDL_FPoint corner : corners) {
-            const SDL_FPoint rotatedCorner = add(world.position, rotate(corner, world.rotationDegrees));
-            minimumX = std::min(minimumX, rotatedCorner.x);
-            minimumY = std::min(minimumY, rotatedCorner.y);
-            maximumX = std::max(maximumX, rotatedCorner.x);
-            maximumY = std::max(maximumY, rotatedCorner.y);
+        world.bounds = transformedBounds(
+            node,
+            world,
+            {0.0F, 0.0F, node.texture.width(), node.texture.height()});
+        if (const auto visible = node.texture.visibleBounds(); visible.has_value()) {
+            world.visibleBounds = transformedBounds(
+                node,
+                world,
+                {static_cast<float>(visible->x),
+                 static_cast<float>(visible->y),
+                 static_cast<float>(visible->w),
+                 static_cast<float>(visible->h)});
         }
-        world.bounds = {
-            minimumX,
-            minimumY,
-            maximumX - minimumX,
-            maximumY - minimumY};
     }
 
     output.push_back(world);
@@ -555,6 +589,14 @@ bool Rig2D::debugRender(Renderer2D& renderer, const RigPose& pose) const {
 }
 
 SDL_FRect Rig2D::bounds(const RigPose& pose) const {
+    return unionBounds(pose, false);
+}
+
+SDL_FRect Rig2D::visibleBounds(const RigPose& pose) const {
+    return unionBounds(pose, true);
+}
+
+SDL_FRect Rig2D::unionBounds(const RigPose& pose, bool visibleOnly) const {
     const std::vector<RigWorldNode> worlds = evaluateWorldNodes(pose);
     SDL_FRect result{
         std::numeric_limits<float>::max(),
@@ -565,14 +607,15 @@ SDL_FRect Rig2D::bounds(const RigPose& pose) const {
     float maximumY = std::numeric_limits<float>::lowest();
     bool hasTexture = false;
     for (const RigWorldNode& world : worlds) {
-        if (world.bounds.w <= 0.0F || world.bounds.h <= 0.0F) {
+        const SDL_FRect& nodeBounds = visibleOnly ? world.visibleBounds : world.bounds;
+        if (nodeBounds.w <= 0.0F || nodeBounds.h <= 0.0F) {
             continue;
         }
         hasTexture = true;
-        result.x = std::min(result.x, world.bounds.x);
-        result.y = std::min(result.y, world.bounds.y);
-        maximumX = std::max(maximumX, world.bounds.x + world.bounds.w);
-        maximumY = std::max(maximumY, world.bounds.y + world.bounds.h);
+        result.x = std::min(result.x, nodeBounds.x);
+        result.y = std::min(result.y, nodeBounds.y);
+        maximumX = std::max(maximumX, nodeBounds.x + nodeBounds.w);
+        maximumY = std::max(maximumY, nodeBounds.y + nodeBounds.h);
     }
     if (!hasTexture) {
         const SDL_FPoint root{
@@ -612,12 +655,12 @@ SDL_FPoint Rig2D::footContactPosition(
     }
     const float width = node.texture.width() * worldIterator->scale.x;
     const float height = node.texture.height() * worldIterator->scale.y;
+    const float contactX = mirrored_
+        ? 1.0F - node.groundContact.x
+        : node.groundContact.x;
     SDL_FPoint localOffset{
-        (node.groundContact.x - worldIterator->pivot.x) * width,
+        (contactX - worldIterator->pivot.x) * width,
         (node.groundContact.y - worldIterator->pivot.y) * height};
-    if (mirrored_) {
-        localOffset.x = -localOffset.x;
-    }
     return add(worldIterator->position, rotate(localOffset, worldIterator->rotationDegrees));
 }
 

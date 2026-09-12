@@ -44,6 +44,7 @@ public:
     [[nodiscard]] float characterHeight() const noexcept;
     [[nodiscard]] bool usesLegacyWalkFrames() const noexcept;
     [[nodiscard]] bool masterReferenceEnabled() const noexcept;
+    [[nodiscard]] SDL_FRect masterReferenceDestination() const noexcept;
     [[nodiscard]] bool rigPaused() const noexcept;
     [[nodiscard]] std::size_t selectedRigNodeIndex() const noexcept;
     [[nodiscard]] std::string_view selectedRigNodeId() const noexcept;

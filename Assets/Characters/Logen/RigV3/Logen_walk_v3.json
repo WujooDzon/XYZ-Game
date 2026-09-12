@@ -7,7 +7,7 @@
     {
       "label": "contact_a",
       "phase": 0.0,
-      "root_offset_px": [0, 0],
+      "root_offset_px": [0, 6.25],
       "nodes": {
         "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
@@ -43,7 +43,7 @@
     {
       "label": "passing_a",
       "phase": 0.25,
-      "root_offset_px": [0, 1],
+      "root_offset_px": [0, 0],
       "nodes": {
         "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
@@ -79,7 +79,7 @@
     {
       "label": "contact_b",
       "phase": 0.5,
-      "root_offset_px": [0, 0],
+      "root_offset_px": [0, 6.25],
       "nodes": {
         "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "body_shell": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
@@ -115,7 +115,7 @@
     {
       "label": "passing_b",
       "phase": 0.75,
-      "root_offset_px": [0, 1],
+      "root_offset_px": [0, 0],
       "nodes": {
         "pelvis": {"position": [0, 0], "rotation": 0, "scale": [1, 1]},
         "left_arm": {"position": [0, 0], "rotation": -2, "scale": [1, 1]},

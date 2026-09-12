@@ -47,6 +47,7 @@ struct RigWorldNode {
     SDL_FPoint scale{1.0F, 1.0F};
     SDL_FPoint pivot{0.5F, 0.5F};
     SDL_FRect bounds{0.0F, 0.0F, 0.0F, 0.0F};
+    SDL_FRect visibleBounds{0.0F, 0.0F, 0.0F, 0.0F};
     int zOrder = 0;
 };
 
@@ -67,6 +68,7 @@ public:
     [[nodiscard]] bool debugRender(Renderer2D& renderer, const RigPose& pose) const;
     [[nodiscard]] std::vector<RigWorldNode> worldNodes(const RigPose& pose) const;
     [[nodiscard]] SDL_FRect bounds(const RigPose& pose) const;
+    [[nodiscard]] SDL_FRect visibleBounds(const RigPose& pose) const;
     [[nodiscard]] SDL_FPoint footContactPosition(
         std::string_view nodeId,
         const RigPose& pose) const;
@@ -100,6 +102,9 @@ private:
         SDL_FPoint parentScale,
         bool hasParent,
         std::vector<RigWorldNode>& output) const;
+    [[nodiscard]] SDL_FRect unionBounds(
+        const RigPose& pose,
+        bool visibleOnly) const;
 
     std::vector<RigNode> nodes_;
     int rootIndex_ = -1;

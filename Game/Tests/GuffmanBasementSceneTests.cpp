@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
@@ -40,6 +41,24 @@ int main() {
               "rig character height is in the intended range");
         check(scene.walkPhase() == 0.0F, "walk starts at neutral phase");
         check(scene.footPlantCorrectionEnabled(), "foot planting defaults to enabled");
+        const SDL_FRect masterRight = scene.masterReferenceDestination();
+        constexpr float masterVisibleLeft = 261.0F;
+        constexpr float masterVisibleTop = 149.0F;
+        constexpr float masterVisibleWidth = 524.0F;
+        constexpr float masterVisibleHeight = 1169.0F;
+        const float masterScale =
+            xyz::game::GuffmanBasementScene::PlayerVisibleHeight / masterVisibleHeight;
+        check(std::fabs(
+                  masterRight.x + (masterVisibleLeft + masterVisibleWidth * 0.5F) * masterScale
+                  - xyz::game::GuffmanBasementScene::PlayerInitialX) < 0.1F,
+              "master visible art is centered on the player root");
+        check(std::fabs(
+                  masterRight.y + (masterVisibleTop + masterVisibleHeight) * masterScale
+                  - xyz::game::GuffmanBasementScene::PlayerBaselineY) < 0.1F,
+              "master visible sole line shares the gameplay baseline");
+        check(std::fabs(masterVisibleHeight * masterScale
+                        - xyz::game::GuffmanBasementScene::PlayerVisibleHeight) < 0.1F,
+              "master visible content, not file padding, is scaled to 188 pixels");
         renderer.clear();
         scene.render(renderer);
         renderer.present();

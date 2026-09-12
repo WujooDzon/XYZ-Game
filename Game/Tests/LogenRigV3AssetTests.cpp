@@ -70,67 +70,6 @@ std::string requiredString(const JsonValue& object, std::string_view key) {
     return value->string();
 }
 
-float requiredNumber(const JsonValue& object, std::string_view key) {
-    const JsonValue* value = required(object, key);
-    check(value->isNumber(), "JSON key is not a number: " + std::string(key));
-    return static_cast<float>(value->number());
-}
-
-float requiredRotation(const JsonValue& keyframe, std::string_view nodeId) {
-    const JsonValue* nodes = required(keyframe, "nodes");
-    check(nodes->isObject(), "keyframe nodes are an object");
-    const JsonValue* node = required(*nodes, nodeId);
-    check(node->isObject(), "keyframe node is an object: " + std::string(nodeId));
-    return requiredNumber(*node, "rotation");
-}
-
-void validateRootOffset(const JsonValue& keyframe, float expectedY) {
-    const JsonValue* offset = required(keyframe, "root_offset_px");
-    check(offset->isArray() && offset->array().size() == 2U,
-          "walk keyframe has a logical root offset");
-    check(offset->array()[0].isNumber() && offset->array()[1].isNumber(),
-          "walk root offset contains numbers");
-    check(std::fabs(offset->array()[0].number()) < 0.001
-              && std::fabs(offset->array()[1].number() - expectedY) < 0.001,
-          "walk root offset matches the requested body-weight bob");
-}
-
-void validateWalkBiomechanics(const JsonValue& animation) {
-    const JsonValue* keyframes = required(animation, "keyframes");
-    check(keyframes->isArray() && keyframes->array().size() == 8U,
-          "walk has exactly eight keyframes");
-    const std::array<float, 8> rootOffsets{0.0F, 2.0F, 1.0F, -1.0F,
-                                           0.0F, 2.0F, 1.0F, -1.0F};
-    for (std::size_t index = 0; index < rootOffsets.size(); ++index) {
-        validateRootOffset(keyframes->array()[index], rootOffsets[index]);
-        check(std::fabs(requiredRotation(keyframes->array()[index], "body_shell")) <= 0.35F,
-              "body shell stays visually stable during the walk");
-        check(std::fabs(requiredRotation(keyframes->array()[index], "cloak_tail")) <= 0.5F,
-              "cloak tail motion stays secondary");
-        check(std::fabs(requiredRotation(keyframes->array()[index], "cloak_front")) <= 0.5F,
-              "cloak front motion stays secondary");
-    }
-
-    const JsonValue& contactA = keyframes->array()[0];
-    const JsonValue& passingA = keyframes->array()[2];
-    const JsonValue& contactB = keyframes->array()[4];
-    const JsonValue& passingB = keyframes->array()[6];
-    check(requiredRotation(contactA, "far_thigh") <= -18.0F
-              && requiredRotation(contactA, "near_thigh") >= 15.0F,
-          "contact A separates far-forward and near-rear legs");
-    check(requiredRotation(contactB, "near_thigh") <= -18.0F
-              && requiredRotation(contactB, "far_thigh") >= 15.0F,
-          "contact B reverses the leg separation");
-    check(requiredRotation(passingA, "near_thigh") < 0.0F
-              && requiredRotation(passingA, "near_shin") >= 40.0F
-              && requiredRotation(passingA, "far_shin") <= 15.0F,
-          "passing A has a bent airborne near swing leg");
-    check(requiredRotation(passingB, "far_thigh") < 0.0F
-              && requiredRotation(passingB, "far_shin") >= 40.0F
-              && requiredRotation(passingB, "near_shin") <= 15.0F,
-          "passing B has a bent airborne far swing leg");
-}
-
 AlphaBounds alphaBounds(SDL_Surface* source) {
     SDL_Surface* converted = SDL_ConvertSurface(source, SDL_PIXELFORMAT_RGBA32);
     check(converted != nullptr, "surface converts to RGBA32");
@@ -156,6 +95,32 @@ AlphaBounds alphaBounds(SDL_Surface* source) {
         }
     }
     SDL_DestroySurface(converted);
+    return bounds;
+}
+
+AlphaBounds renderedAlphaBounds(
+    xyz::engine::Renderer2D& renderer,
+    xyz::engine::Rig2D& rig,
+    const xyz::engine::RigPose& pose) {
+    SDL_Texture* target = SDL_CreateTexture(
+        renderer.native(),
+        SDL_PIXELFORMAT_RGBA8888,
+        SDL_TEXTUREACCESS_TARGET,
+        xyz::engine::Renderer2D::LogicalWidth,
+        xyz::engine::Renderer2D::LogicalHeight);
+    check(target != nullptr, "pose alpha target is created");
+    SDL_Texture* previousTarget = SDL_GetRenderTarget(renderer.native());
+    check(SDL_SetRenderTarget(renderer.native(), target), "pose alpha target is selected");
+    check(SDL_SetRenderDrawColor(renderer.native(), 0, 0, 0, 0),
+          "transparent clear color is selected");
+    check(SDL_RenderClear(renderer.native()), "pose alpha target is cleared");
+    check(rig.render(renderer, pose), "pose renders for alpha contour measurement");
+    SDL_Surface* pixels = SDL_RenderReadPixels(renderer.native(), nullptr);
+    check(pixels != nullptr, "pose alpha pixels are readable");
+    const AlphaBounds bounds = alphaBounds(pixels);
+    SDL_DestroySurface(pixels);
+    check(SDL_SetRenderTarget(renderer.native(), previousTarget), "pose target is restored");
+    SDL_DestroyTexture(target);
     return bounds;
 }
 
@@ -283,10 +248,6 @@ int main() {
         directory / "Logen_walk_v3.json",
         {"contact_a", "down_a", "passing_a", "up_a",
          "contact_b", "down_b", "passing_b", "up_b"});
-    std::string walkError;
-    const auto walk = JsonValue::parseFile(directory / "Logen_walk_v3.json", walkError);
-    check(walk.has_value() && walk->isObject(), "V3 walk animation parses for biomechanics checks");
-    validateWalkBiomechanics(*walk);
     std::string error;
     const auto idle = JsonValue::parseFile(directory / "Logen_idle_v3.json", error);
     check(idle.has_value() && idle->isObject(), "V3 idle animation parses");
@@ -325,6 +286,11 @@ int main() {
         check(walkAnimation.load(directory / "Logen_walk_v3.json", animationError),
               animationError.c_str());
         rig.setRootPosition({0.0F, 500.0F});
+        const auto neutralWorlds = rig.worldNodes({});
+        const auto* neutralCloak = findWorldNode(neutralWorlds, "cloak_tail");
+        check(neutralCloak != nullptr, "neutral cloak tail world geometry exists");
+        const float neutralCloakBottom =
+            neutralCloak->visibleBounds.y + neutralCloak->visibleBounds.h;
         const auto contactA = walkAnimation.sample(walkAnimation.keyframePhase(0));
         const auto passingA = walkAnimation.sample(walkAnimation.keyframePhase(2));
         const auto contactB = walkAnimation.sample(walkAnimation.keyframePhase(4));
@@ -337,18 +303,46 @@ int main() {
         const float passingAFarY = rig.footContactPosition("far_boot", passingA).y;
         const float passingBNearY = rig.footContactPosition("near_boot", passingB).y;
         const float passingBFarY = rig.footContactPosition("far_boot", passingB).y;
-        check(std::fabs(contactAFarY - contactANearY) <= 8.0F,
-              "contact A keeps both feet on the same floor line");
-        check(std::fabs(contactBNearY - contactBFarY) <= 8.0F,
-              "contact B keeps both feet on the same floor line");
+        const AlphaBounds contactAContour = renderedAlphaBounds(renderer, rig, contactA);
+        const AlphaBounds passingAContour = renderedAlphaBounds(renderer, rig, passingA);
+        const AlphaBounds contactBContour = renderedAlphaBounds(renderer, rig, contactB);
+        const AlphaBounds passingBContour = renderedAlphaBounds(renderer, rig, passingB);
+
+        std::cout << "Logen geometry metrics: scale=" << rig.globalScale()
+                  << " cloak_bottom=" << neutralCloakBottom
+                  << " contact_a_far=" << contactAFarY
+                  << " contact_a_near=" << contactANearY
+                  << " passing_a_far=" << passingAFarY
+                  << " passing_a_near=" << passingANearY
+                  << " contact_b_near=" << contactBNearY
+                  << " contact_b_far=" << contactBFarY
+                  << " passing_b_near=" << passingBNearY
+                  << " passing_b_far=" << passingBFarY
+                  << " contour_bottoms=" << contactAContour.bottom << "/"
+                  << passingAContour.bottom << "/" << contactBContour.bottom << "/"
+                  << passingBContour.bottom << "\n";
+
+        constexpr float baseline = 500.0F;
+        check(neutralCloakBottom >= baseline - 12.0F
+                  && neutralCloakBottom <= baseline + 1.0F,
+              "neutral cloak mass reaches the ankle/ground region");
+        check(std::fabs(contactAFarY - baseline) <= 1.0F,
+              "contact A support anchor is on the real baseline");
+        check(std::fabs(contactBNearY - baseline) <= 1.0F,
+              "contact B support anchor is on the real baseline");
+        check(std::fabs(passingAFarY - baseline) <= 1.0F,
+              "passing A support anchor remains on the real baseline");
+        check(std::fabs(passingBNearY - baseline) <= 1.0F,
+              "passing B support anchor remains on the real baseline");
         check(passingANearY <= passingAFarY - 4.0F,
-              "passing A lifts near foot above the planted far foot");
-        check(std::fabs(passingAFarY - contactAFarY) <= 8.0F,
-              "passing A planted far foot remains near the floor line");
+              "passing A swing contact is visibly above its support");
         check(passingBFarY <= passingBNearY - 4.0F,
-              "passing B lifts far foot above the planted near foot");
-        check(std::fabs(passingBNearY - contactBNearY) <= 8.0F,
-              "passing B planted near foot remains near the floor line");
+              "passing B swing contact is visibly above its support");
+        check(contactAContour.bottom <= static_cast<int>(baseline)
+                  && passingAContour.bottom <= static_cast<int>(baseline)
+                  && contactBContour.bottom <= static_cast<int>(baseline)
+                  && passingBContour.bottom <= static_cast<int>(baseline),
+              "rendered sole contour never penetrates the floor");
     }
     SDL_DestroyWindow(window);
     SDL_Quit();

@@ -348,17 +348,9 @@ void GuffmanBasementScene::render(engine::Renderer2D& renderer) const {
     renderer.drawTexture(background_, backgroundDestination);
 
     if (masterReferenceEnabled_ && masterReference_.loaded()) {
-        const float masterHeight = playerRig_.targetHeight();
-        const float masterScale = masterHeight / masterReference_.height();
-        const float masterWidth = masterReference_.width() * masterScale;
-        const SDL_FRect masterDestination{
-            std::round(player_.x()) - masterWidth * 0.5F,
-            std::round(player_.baselineY()) - masterHeight,
-            masterWidth,
-            masterHeight};
         renderer.drawTexture(
             masterReference_,
-            masterDestination,
+            masterReferenceDestination(),
             SDL_Color{255, 255, 255, 90},
             player_.facing() == Facing::Left);
     }
@@ -580,6 +572,25 @@ bool GuffmanBasementScene::usesLegacyWalkFrames() const noexcept {
 
 bool GuffmanBasementScene::masterReferenceEnabled() const noexcept {
     return masterReferenceEnabled_;
+}
+
+SDL_FRect GuffmanBasementScene::masterReferenceDestination() const noexcept {
+    const auto visible = masterReference_.visibleBounds();
+    if (!masterReference_.loaded() || !visible.has_value() || visible->h <= 0) {
+        return {};
+    }
+    const float scale = playerRig_.targetHeight() / static_cast<float>(visible->h);
+    const float visibleSourceLeft = player_.facing() == Facing::Left
+        ? masterReference_.width()
+            - static_cast<float>(visible->x + visible->w)
+        : static_cast<float>(visible->x);
+    return {
+        std::round(player_.x())
+            - (visibleSourceLeft + static_cast<float>(visible->w) * 0.5F) * scale,
+        std::round(player_.baselineY())
+            - static_cast<float>(visible->y + visible->h) * scale,
+        masterReference_.width() * scale,
+        masterReference_.height() * scale};
 }
 
 bool GuffmanBasementScene::rigPaused() const noexcept {

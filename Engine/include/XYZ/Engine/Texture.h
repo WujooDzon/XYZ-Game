@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <optional>
 
 #include <SDL3/SDL.h>
 
@@ -23,11 +24,13 @@ public:
     [[nodiscard]] SDL_Texture* native() const noexcept;
     [[nodiscard]] float width() const noexcept;
     [[nodiscard]] float height() const noexcept;
+    [[nodiscard]] std::optional<SDL_Rect> visibleBounds() const noexcept;
 
 private:
     SDL_Texture* texture_ = nullptr;
     float width_ = 0.0F;
     float height_ = 0.0F;
+    std::optional<SDL_Rect> visibleBounds_;
 };
 
 }

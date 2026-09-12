@@ -6,6 +6,7 @@
 #include <string>
 
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 
 #include "XYZ/Engine/Rig2D.h"
 #include "XYZ/Engine/Renderer2D.h"
@@ -15,12 +16,13 @@ namespace {
 std::filesystem::path writeDefinition(
     const std::filesystem::path& directory,
     const std::string& name,
-    const std::string& nodes) {
+    const std::string& nodes,
+    float targetHeight = 941.0F) {
     const std::filesystem::path path = directory / name;
     std::ofstream file(path);
     file << R"({
   "global_scale": 1.0,
-  "target_height": 941.0,
+  "target_height": )" << targetHeight << R"(,
   "root_to_ground": [0.0, 0.0],
   "nodes": )" << nodes << "\n}\n";
     return path;
@@ -82,6 +84,84 @@ int main() {
               "neutral rig height is normalized to target height");
         check(rig.rootToGround().x == 0.0F && rig.rootToGround().y == 0.0F,
               "ground anchor is explicit and fixed");
+
+        const auto paddedImage = testDirectory / "padded-rig.png";
+        SDL_Surface* paddedSurface = SDL_CreateSurface(10, 20, SDL_PIXELFORMAT_RGBA32);
+        check(paddedSurface != nullptr, "padded rig fixture surface is created");
+        check(SDL_ClearSurface(paddedSurface, 0.0F, 0.0F, 0.0F, 0.0F),
+              "padded rig fixture starts transparent");
+        const SDL_Rect visibleRectangle{2, 4, 6, 10};
+        check(SDL_FillSurfaceRect(
+                  paddedSurface,
+                  &visibleRectangle,
+                  SDL_MapSurfaceRGBA(paddedSurface, 70, 50, 30, 255)),
+              "padded rig fixture contains visible art");
+        check(IMG_SavePNG(paddedSurface, paddedImage.string().c_str()),
+              "padded rig fixture is saved");
+        SDL_DestroySurface(paddedSurface);
+        const std::string paddedNodes =
+            "[{\"id\":\"root\",\"parent\":null,\"image\":\""
+            + paddedImage.string()
+            + "\",\"position\":[0,0],\"pivot\":[0,0],\"rotation\":0,"
+              "\"scale\":[1,1],\"z\":0}]";
+        xyz::engine::Rig2D paddedRig;
+        const auto paddedDefinition = writeDefinition(
+            testDirectory, "padded-rig.json", paddedNodes, 100.0F);
+        check(paddedRig.loadDefinition(renderer, paddedDefinition, error), error.c_str());
+        const SDL_FRect paddedVisibleBounds = paddedRig.visibleBounds({});
+        const SDL_FRect paddedCanvasBounds = paddedRig.bounds({});
+        check(std::fabs(paddedVisibleBounds.h - 100.0F) < 0.1F,
+              "transparent padding does not change normalized visible height");
+        check(std::fabs(paddedCanvasBounds.h - 200.0F) < 0.1F,
+              "canvas bounds remain distinct from visible art bounds");
+
+        const std::string mirroredNodes =
+            "["
+            "{\"id\":\"root\",\"parent\":null,\"image\":\"\",\"position\":[0,0],"
+            "\"pivot\":[0.5,0.5],\"rotation\":12,\"scale\":[1,1],\"z\":0},"
+            "{\"id\":\"boot\",\"parent\":\"root\",\"image\":\""
+            + paddedImage.string()
+            + "\",\"position\":[20,10],\"pivot\":[0.18,0.12],"
+              "\"ground_contact\":[0.90,0.90],\"rotation\":0,"
+              "\"scale\":[1.2,0.8],\"z\":1}]";
+        xyz::engine::Rig2D mirroredRig;
+        const auto mirroredDefinition = writeDefinition(
+            testDirectory, "mirrored-contact.json", mirroredNodes, 100.0F);
+        check(mirroredRig.loadDefinition(renderer, mirroredDefinition, error), error.c_str());
+        constexpr float mirrorAxis = 300.0F;
+        mirroredRig.setRootPosition({mirrorAxis, 210.0F});
+        for (const float rotation : {0.0F, 25.0F, -25.0F}) {
+            xyz::engine::RigPose pose;
+            pose.nodes["boot"].rotationDegrees = rotation;
+            mirroredRig.setMirrored(false);
+            const SDL_FPoint rightContact = mirroredRig.footContactPosition("boot", pose);
+            const SDL_FRect rightBounds = mirroredRig.bounds(pose);
+            const SDL_FRect rightVisibleBounds = mirroredRig.visibleBounds(pose);
+            mirroredRig.setMirrored(true);
+            const SDL_FPoint leftContact = mirroredRig.footContactPosition("boot", pose);
+            const SDL_FRect leftBounds = mirroredRig.bounds(pose);
+            const SDL_FRect leftVisibleBounds = mirroredRig.visibleBounds(pose);
+            check(std::fabs(leftContact.x - (2.0F * mirrorAxis - rightContact.x)) < 0.1F,
+                  "mirrored p=0.18/c=0.90 contact reflects around the render root");
+            check(std::fabs(leftContact.y - rightContact.y) < 0.1F,
+                  "mirrored contact preserves Y under parent and child rotations");
+            check(std::fabs(leftBounds.x
+                            - (2.0F * mirrorAxis - (rightBounds.x + rightBounds.w))) < 0.1F
+                      && std::fabs(leftBounds.w - rightBounds.w) < 0.1F
+                      && std::fabs(leftBounds.y - rightBounds.y) < 0.1F
+                      && std::fabs(leftBounds.h - rightBounds.h) < 0.1F,
+                  "mirrored canvas bounds match the rendered texture geometry");
+            check(std::fabs(leftVisibleBounds.x
+                            - (2.0F * mirrorAxis
+                               - (rightVisibleBounds.x + rightVisibleBounds.w))) < 0.1F
+                      && std::fabs(leftVisibleBounds.w - rightVisibleBounds.w) < 0.1F,
+                  "mirrored visible bounds reflect around the same root");
+            mirroredRig.setMirrored(false);
+            const SDL_FPoint reflectedTwice = mirroredRig.footContactPosition("boot", pose);
+            check(std::fabs(reflectedTwice.x - rightContact.x) < 0.1F
+                      && std::fabs(reflectedTwice.y - rightContact.y) < 0.1F,
+                  "disabling mirroring restores the original contact");
+        }
 
         rig.setRootPosition({100.0F, 200.0F});
         const auto neutralWorld = rig.worldNodes({});

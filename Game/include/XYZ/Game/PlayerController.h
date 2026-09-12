@@ -27,6 +27,7 @@ public:
     [[nodiscard]] float x() const noexcept;
     [[nodiscard]] float baselineY() const noexcept;
     [[nodiscard]] float velocity() const noexcept;
+    [[nodiscard]] float speed() const noexcept;
     [[nodiscard]] std::optional<float> targetX() const noexcept;
     [[nodiscard]] bool isMoving() const noexcept;
     [[nodiscard]] Facing facing() const noexcept;

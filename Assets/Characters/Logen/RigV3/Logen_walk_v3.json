@@ -1,7 +1,7 @@
 {
   "name": "walk",
   "loop": true,
-  "stride_distance": 68.0,
+  "stride_distance": 80.0,
   "duration_seconds": 1.0,
   "keyframes": [
     {

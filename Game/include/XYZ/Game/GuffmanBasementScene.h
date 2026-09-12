@@ -23,6 +23,7 @@ public:
     static constexpr float PlayerBoundsLeft = 80.0F;
     static constexpr float PlayerBoundsRight = 880.0F;
     static constexpr float PlayerVisibleHeight = 188.0F;
+    static constexpr float PlayerMovementSpeed = 120.0F;
 
     explicit GuffmanBasementScene(std::filesystem::path projectRoot);
 
@@ -40,6 +41,8 @@ public:
     [[nodiscard]] std::size_t idleKeyframeCount() const noexcept;
     [[nodiscard]] float walkPhase() const noexcept;
     [[nodiscard]] float playerVelocity() const noexcept;
+    [[nodiscard]] float playerSpeed() const noexcept;
+    [[nodiscard]] float walkStrideDistance() const noexcept;
     [[nodiscard]] float rigHeight() const noexcept;
     [[nodiscard]] float characterHeight() const noexcept;
     [[nodiscard]] bool usesLegacyWalkFrames() const noexcept;

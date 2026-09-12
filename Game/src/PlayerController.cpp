@@ -112,6 +112,10 @@ float PlayerController::velocity() const noexcept {
     return velocity_;
 }
 
+float PlayerController::speed() const noexcept {
+    return speed_;
+}
+
 std::optional<float> PlayerController::targetX() const noexcept {
     return targetX_;
 }

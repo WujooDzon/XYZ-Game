@@ -36,6 +36,12 @@ int main() {
         check(!scene.usesLegacyWalkFrames(), "scene uses hierarchical rig instead of legacy frames");
         check(scene.rigNodeCount() == 11, "V3 rig contains pelvis and exactly 10 active art parts");
         check(scene.walkKeyframeCount() == 8, "walk animation contains eight poses");
+        const float cyclesPerSecond = scene.playerSpeed() / scene.walkStrideDistance();
+        const float contactsPerSecond = cyclesPerSecond * 2.0F;
+        check(cyclesPerSecond >= 1.2F && cyclesPerSecond <= 1.8F,
+              "movement speed and stride produce a deliberate march cycle rate");
+        check(contactsPerSecond >= 2.4F && contactsPerSecond <= 3.6F,
+              "movement speed and stride avoid the audited rapid contact rate");
         check(scene.idleKeyframeCount() >= 2, "idle animation contains looping poses");
         check(scene.rigHeight() >= 182.0F && scene.rigHeight() <= 194.0F,
               "rig character height is in the intended range");
@@ -91,7 +97,7 @@ int main() {
         check(scene.walkPhase() > 0.0F, "walk phase advances from displacement");
 
         input.beginFrame();
-        for (int frame = 0; frame < 120; ++frame) {
+        for (int frame = 0; frame < 240; ++frame) {
             scene.update(1.0F / 60.0F, input, renderer);
         }
         check(!scene.isWalking(), "arrival switches back to idle");

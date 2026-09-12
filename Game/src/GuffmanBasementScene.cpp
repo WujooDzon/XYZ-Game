@@ -61,7 +61,7 @@ const char* displayWalkPoseLabel(std::string_view label) {
 
 GuffmanBasementScene::GuffmanBasementScene(std::filesystem::path projectRoot)
     : projectRoot_(std::move(projectRoot)),
-      player_({PlayerBoundsLeft, PlayerBoundsRight}, PlayerInitialX, PlayerBaselineY, 220.0F) {}
+      player_({PlayerBoundsLeft, PlayerBoundsRight}, PlayerInitialX, PlayerBaselineY, PlayerMovementSpeed) {}
 
 bool GuffmanBasementScene::initialize(engine::Renderer2D& renderer, std::string& error) {
     const std::filesystem::path backgroundPath =
@@ -553,6 +553,14 @@ float GuffmanBasementScene::walkPhase() const noexcept {
 
 float GuffmanBasementScene::playerVelocity() const noexcept {
     return player_.velocity();
+}
+
+float GuffmanBasementScene::playerSpeed() const noexcept {
+    return player_.speed();
+}
+
+float GuffmanBasementScene::walkStrideDistance() const noexcept {
+    return walkRigAnimation_.strideDistance();
 }
 
 float GuffmanBasementScene::rigHeight() const noexcept {

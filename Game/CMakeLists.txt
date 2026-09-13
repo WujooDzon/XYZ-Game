@@ -58,3 +58,11 @@ target_include_directories(XYZRigReviewExporterTests PRIVATE include)
 target_link_libraries(XYZRigReviewExporterTests PRIVATE XYZEngine)
 add_test(NAME XYZRigReviewExporterTests COMMAND XYZRigReviewExporterTests)
 set_tests_properties(XYZRigReviewExporterTests PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
+add_executable(XYZLogenFrameAnimationAssetTests
+    Tests/LogenFrameAnimationAssetTests.cpp
+)
+
+target_link_libraries(XYZLogenFrameAnimationAssetTests PRIVATE XYZEngine)
+add_test(NAME XYZLogenFrameAnimationAssetTests COMMAND XYZLogenFrameAnimationAssetTests)
+set_tests_properties(XYZLogenFrameAnimationAssetTests PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

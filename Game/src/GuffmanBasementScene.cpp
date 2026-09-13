@@ -13,8 +13,86 @@
 namespace xyz::game {
 namespace {
 
+std::vector<std::string> idleFrameNames() {
+    return {
+        "Logen_idle_right_01.png",
+        "Logen_idle_right_02.png",
+        "Logen_idle_right_03.png",
+        "Logen_idle_right_04.png"};
+}
+
+std::vector<std::string> walkFrameNames() {
+    return {
+        "WalkV2/Logen_walk_right_01.png",
+        "WalkV2/Logen_walk_right_02.png",
+        "WalkV2/Logen_walk_right_03.png",
+        "WalkV2/Logen_walk_right_04.png",
+        "WalkV2/Logen_walk_right_05.png",
+        "WalkV2/Logen_walk_right_06.png",
+        "WalkV2/Logen_walk_right_07.png",
+        "WalkV2/Logen_walk_right_08.png"};
+}
+
+std::filesystem::path characterDirectory(const std::filesystem::path& root) {
+    return root / "Assets" / "Characters" / "Logen";
+}
+
 std::filesystem::path rigDirectory(const std::filesystem::path& root) {
-    return root / "Assets" / "Characters" / "Logen" / "RigV3";
+    return characterDirectory(root) / "RigV3";
+}
+
+bool loadFrameTextures(
+    engine::Renderer2D& renderer,
+    const std::filesystem::path& directory,
+    const std::vector<std::string>& names,
+    std::vector<engine::Texture>& textures,
+    std::string& error) {
+    std::vector<engine::Texture> loaded;
+    loaded.reserve(names.size());
+    for (const std::string& name : names) {
+        const std::filesystem::path path = directory / name;
+        engine::Texture texture;
+        if (!texture.load(renderer.native(), path, "Logen full-frame sprite")) {
+            error = "Could not load Logen animation frame: " + path.string();
+            return false;
+        }
+        loaded.push_back(std::move(texture));
+    }
+    textures = std::move(loaded);
+    return true;
+}
+
+float scaleForReferenceFrame(const std::vector<engine::Texture>& textures, float targetHeight) {
+    if (textures.empty()) {
+        return 1.0F;
+    }
+    const auto visible = textures.front().visibleBounds();
+    if (!visible.has_value() || visible->h <= 0) {
+        return 1.0F;
+    }
+    return targetHeight / static_cast<float>(visible->h);
+}
+
+SDL_FRect frameDestination(
+    const engine::Texture& texture,
+    float scale,
+    float playerX,
+    float baselineY,
+    bool mirrored) {
+    const auto visible = texture.visibleBounds();
+    if (!visible.has_value()) {
+        return {};
+    }
+    const float visibleLeft = mirrored
+        ? texture.width() - static_cast<float>(visible->x + visible->w)
+        : static_cast<float>(visible->x);
+    return {
+        std::round(playerX)
+            - (visibleLeft + static_cast<float>(visible->w) * 0.5F) * scale,
+        std::round(baselineY)
+            - static_cast<float>(visible->y + visible->h) * scale,
+        texture.width() * scale,
+        texture.height() * scale};
 }
 
 const char* supportFootName(FootPlantController::SupportFoot foot, bool walking) {
@@ -61,6 +139,8 @@ const char* displayWalkPoseLabel(std::string_view label) {
 
 GuffmanBasementScene::GuffmanBasementScene(std::filesystem::path projectRoot)
     : projectRoot_(std::move(projectRoot)),
+      idleSpriteAnimation_(idleFrameNames(), 6.0F),
+      walkSpriteAnimation_(walkFrameNames(), 10.0F),
       player_({PlayerBoundsLeft, PlayerBoundsRight}, PlayerInitialX, PlayerBaselineY, PlayerMovementSpeed) {}
 
 bool GuffmanBasementScene::initialize(engine::Renderer2D& renderer, std::string& error) {
@@ -77,6 +157,25 @@ bool GuffmanBasementScene::initialize(engine::Renderer2D& renderer, std::string&
         error = "Could not load Logen master reference: " + masterPath.string();
         return false;
     }
+    const std::filesystem::path framesDirectory = characterDirectory(projectRoot_);
+    if (!loadFrameTextures(
+            renderer,
+            framesDirectory,
+            idleFrameNames(),
+            idleFrameTextures_,
+            error)
+        || !loadFrameTextures(
+            renderer,
+            framesDirectory,
+            walkFrameNames(),
+            walkFrameTextures_,
+            error)) {
+        return false;
+    }
+    idleSpriteScale_ = scaleForReferenceFrame(idleFrameTextures_, PlayerVisibleHeight);
+    walkSpriteScale_ = scaleForReferenceFrame(walkFrameTextures_, PlayerVisibleHeight);
+    idleSpriteAnimation_.reset();
+    walkSpriteAnimation_.reset();
     if (!reloadRig(renderer, error)) {
         return false;
     }
@@ -272,6 +371,11 @@ void GuffmanBasementScene::update(
             lastWalkPhase_ = rigAnimator_.phase();
         }
         walking_ = nowWalking;
+        if (walking_) {
+            walkSpriteAnimation_.reset();
+        } else {
+            idleSpriteAnimation_.reset();
+        }
         rigAnimator_.setAnimation(
             walking_ ? &walkRigAnimation_ : &idleRigAnimation_,
             walking_ ? 0.12F : 0.18F,
@@ -279,9 +383,11 @@ void GuffmanBasementScene::update(
     }
 
     if (walking_) {
+        walkSpriteAnimation_.update(deltaSeconds);
         rigAnimator_.advanceByDistance(std::fabs(player_.x() - previousX));
         lastWalkPhase_ = rigAnimator_.phase();
     } else {
+        idleSpriteAnimation_.update(deltaSeconds);
         rigAnimator_.advanceByTime(deltaSeconds);
     }
     rigAnimator_.updateTransition(deltaSeconds);
@@ -355,7 +461,18 @@ void GuffmanBasementScene::render(engine::Renderer2D& renderer) const {
             player_.facing() == Facing::Left);
     }
 
-    static_cast<void>(playerRig_.render(renderer, rigAnimator_.pose()));
+    const auto& frameTextures = walking_ ? walkFrameTextures_ : idleFrameTextures_;
+    const auto& frameAnimation = walking_ ? walkSpriteAnimation_ : idleSpriteAnimation_;
+    const float frameScale = walking_ ? walkSpriteScale_ : idleSpriteScale_;
+    if (!frameTextures.empty()) {
+        const std::size_t frameIndex = frameAnimation.currentFrame() % frameTextures.size();
+        const engine::Texture& frame = frameTextures[frameIndex];
+        const bool mirrored = player_.facing() == Facing::Left;
+        renderer.drawTexture(
+            frame,
+            frameDestination(frame, frameScale, player_.x(), player_.baselineY(), mirrored),
+            mirrored);
+    }
     if (rigDebugEnabled_) {
         static_cast<void>(playerRig_.debugRender(renderer, rigAnimator_.pose()));
         const auto worlds = playerRig_.worldNodes(rigAnimator_.pose());
@@ -574,8 +691,8 @@ float GuffmanBasementScene::characterHeight() const noexcept {
     return playerRig_.neutralHeight();
 }
 
-bool GuffmanBasementScene::usesLegacyWalkFrames() const noexcept {
-    return false;
+bool GuffmanBasementScene::usesFullFrameAnimation() const noexcept {
+    return true;
 }
 
 bool GuffmanBasementScene::masterReferenceEnabled() const noexcept {

@@ -26,7 +26,10 @@ for RIG_PART in \
     Logen_rig_v3_near_boot.png; do
     test -f "$RIG_DIR/$RIG_PART"
 done
-! rg -q 'Logen_walk_right_0[1-8]\.png' "$ROOT_DIR/Game/src" "$ROOT_DIR/Game/include"
+for FRAME in 01 02 03 04 05 06 07 08; do
+    test -f "$CHARACTER_DIR/WalkV2/Logen_walk_right_${FRAME}.png"
+done
+rg -q 'WalkV2/Logen_walk_right_01\.png' "$ROOT_DIR/Game/src"
 
 printf '%s\n' "== SDL dependencies =="
 SDL3_VERSION="$(brew list --versions sdl3)"

@@ -4,7 +4,9 @@
 #include <filesystem>
 #include <string>
 #include <string_view>
+#include <vector>
 
+#include "XYZ/Engine/Animation.h"
 #include "XYZ/Engine/Input.h"
 #include "XYZ/Engine/Rig2D.h"
 #include "XYZ/Engine/RigAnimation.h"
@@ -45,7 +47,7 @@ public:
     [[nodiscard]] float walkStrideDistance() const noexcept;
     [[nodiscard]] float rigHeight() const noexcept;
     [[nodiscard]] float characterHeight() const noexcept;
-    [[nodiscard]] bool usesLegacyWalkFrames() const noexcept;
+    [[nodiscard]] bool usesFullFrameAnimation() const noexcept;
     [[nodiscard]] bool masterReferenceEnabled() const noexcept;
     [[nodiscard]] SDL_FRect masterReferenceDestination() const noexcept;
     [[nodiscard]] bool rigPaused() const noexcept;
@@ -65,6 +67,12 @@ private:
     std::filesystem::path projectRoot_;
     engine::Texture background_;
     engine::Texture masterReference_;
+    std::vector<engine::Texture> idleFrameTextures_;
+    std::vector<engine::Texture> walkFrameTextures_;
+    engine::Animation idleSpriteAnimation_;
+    engine::Animation walkSpriteAnimation_;
+    float idleSpriteScale_ = 1.0F;
+    float walkSpriteScale_ = 1.0F;
     engine::Rig2D playerRig_;
     engine::RigAnimation idleRigAnimation_;
     engine::RigAnimation walkRigAnimation_;

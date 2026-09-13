@@ -16,8 +16,10 @@ test -f "$RIG_DIR/Logen_idle_v3.json"
 test -f "$ROOT_DIR/Game/include/XYZ/Game/RigReviewExporter.h"
 test -f "$ROOT_DIR/Game/src/RigReviewExporter.cpp"
 ! test -d "$ROOT_DIR/Assets/Characters/Logen/RigV4"
-! rg -q 'Logen_walk_right_0[1-8]\.png|Logen_idle_right_0[1-4]\.png' \
-    "$ROOT_DIR/Game/src" "$ROOT_DIR/Game/include"
+for FRAME in 01 02 03 04 05 06 07 08; do
+    test -f "$CHARACTER_DIR/WalkV2/Logen_walk_right_${FRAME}.png"
+done
+rg -q 'WalkV2/Logen_walk_right_01\.png' "$ROOT_DIR/Game/src"
 ! rg -q 'right_(hand|forearm)' "$RIG_DIR/Logen_rig_v3_definition.json"
 rg -q 'root_offset_px' "$RIG_DIR/Logen_walk_v3.json"
 rg -q 'SupportFoot::Near|SupportFoot::Far' "$ROOT_DIR/Game/src" "$ROOT_DIR/Game/include"

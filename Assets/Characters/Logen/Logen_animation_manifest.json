@@ -1,7 +1,7 @@
 {
   "character": "Logen",
   "canonicalFacing": "right",
-  "visibleHeight": 160,
+  "visibleHeight": 188,
   "idle": {
     "fps": 6,
     "frames": [
@@ -14,14 +14,14 @@
   "walk": {
     "fps": 10,
     "frames": [
-      "Logen_walk_right_01.png",
-      "Logen_walk_right_02.png",
-      "Logen_walk_right_03.png",
-      "Logen_walk_right_04.png",
-      "Logen_walk_right_05.png",
-      "Logen_walk_right_06.png",
-      "Logen_walk_right_07.png",
-      "Logen_walk_right_08.png"
+      "WalkV2/Logen_walk_right_01.png",
+      "WalkV2/Logen_walk_right_02.png",
+      "WalkV2/Logen_walk_right_03.png",
+      "WalkV2/Logen_walk_right_04.png",
+      "WalkV2/Logen_walk_right_05.png",
+      "WalkV2/Logen_walk_right_06.png",
+      "WalkV2/Logen_walk_right_07.png",
+      "WalkV2/Logen_walk_right_08.png"
     ]
   }
 }

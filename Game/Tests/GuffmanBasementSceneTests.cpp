@@ -33,7 +33,8 @@ int main() {
         xyz::game::GuffmanBasementScene scene(".");
         std::string error;
         check(scene.initialize(renderer, error), error.c_str());
-        check(!scene.usesLegacyWalkFrames(), "scene uses hierarchical rig instead of legacy frames");
+        check(scene.usesFullFrameAnimation(),
+              "scene renders complete authored frames instead of the segmented cutout rig");
         check(scene.rigNodeCount() == 11, "V3 rig contains pelvis and exactly 10 active art parts");
         check(scene.walkKeyframeCount() == 8, "walk animation contains eight poses");
         const float cyclesPerSecond = scene.playerSpeed() / scene.walkStrideDistance();
